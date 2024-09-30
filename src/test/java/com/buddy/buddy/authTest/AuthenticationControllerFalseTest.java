@@ -4,6 +4,7 @@ import com.buddy.buddy.auth.AuthenticationService;
 import com.buddy.buddy.auth.DTO.AuthenticationRequest;
 import com.buddy.buddy.auth.DTO.AuthenticationResponse;
 import com.buddy.buddy.auth.DTO.RegisterRequest;
+import com.buddy.buddy.auth.JwtUtils;
 import com.buddy.buddy.auth.controller.AuthenticationController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -28,6 +30,12 @@ public class AuthenticationControllerFalseTest {
 
     @MockBean
     private AuthenticationService authenticationService;
+
+    @MockBean
+    private AuthenticationManager authenticationManager;
+
+    @MockBean
+    private JwtUtils jwtUtils;
 
     @Autowired
     private ObjectMapper objectMapper;

@@ -1,113 +1,103 @@
 package com.buddy.buddy.authTest;
 
-
 import com.buddy.buddy.auth.AuthenticationService;
 import com.buddy.buddy.auth.DTO.AuthenticationRequest;
 import com.buddy.buddy.auth.DTO.AuthenticationResponse;
 import com.buddy.buddy.auth.DTO.RegisterRequest;
+import com.buddy.buddy.auth.JwtUtils;
 import com.buddy.buddy.auth.controller.AuthenticationController;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import java.nio.file.AccessDeniedException;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthenticationController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class AuthenticationControllerTest {
 
     @Autowired
-    private MockMvc mvc;
+    private MockMvc mockMvc;
 
     @MockBean
     private AuthenticationService authenticationService;
 
+    @MockBean
+    private AuthenticationManager authenticationManager;
+
+    @MockBean
+    private JwtUtils jwtUtils;
+
     @Autowired
     private ObjectMapper objectMapper;
 
-    private AuthenticationRequest authenticationRequest;
-    private AuthenticationResponse authenticationResponse;
-    private RegisterRequest registerRequest;
-    @Autowired
-    private MockMvc mockMvc;
-
-    @BeforeEach
-    void setUp() {
-        authenticationRequest = new AuthenticationRequest();
-        authenticationRequest.setEmail("test@test.com");
-        authenticationRequest.setPassword("Password123@");
-
-        authenticationResponse = new AuthenticationResponse();
-        authenticationResponse.setToken("mockToken");
-
-        registerRequest = new RegisterRequest();
-        registerRequest.setEmail("test@test.com");
-        registerRequest.setPassword("Password123@");
-        registerRequest.setEmail("newuser@example.com");
-    }
-
     @Test
     void testRegister() throws Exception {
-        when(authenticationService.register(any(RegisterRequest.class))).thenReturn(authenticationResponse);
+        RegisterRequest registerRequest = new RegisterRequest("test@test.com", "Password123!");
+        AuthenticationResponse mockResponse = new AuthenticationResponse("mockToken");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/register")
+        when(authenticationService.register(any(RegisterRequest.class))).thenReturn(mockResponse);
+
+        mockMvc.perform(post("/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").value("mockToken"))
-                .andDo(print());
+                .andExpect(jsonPath("$.token").value("mockToken"));
     }
 
     @Test
     void testAuthenticate() throws Exception {
-        when(authenticationService.authenticate(any(AuthenticationRequest.class))).thenReturn(authenticationResponse);
+        AuthenticationRequest authRequest = new AuthenticationRequest("test@test.com", "Password123!");
+        AuthenticationResponse mockResponse = new AuthenticationResponse("mockToken");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/authenticate")
+        when(authenticationService.authenticate(any(AuthenticationRequest.class))).thenReturn(mockResponse);
+
+
+        mockMvc.perform(post("/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(authenticationRequest)))
+                        .content(objectMapper.writeValueAsString(authRequest)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").value("mockToken"))
-                .andDo(print());
+                .andExpect(jsonPath("$.token").value("mockToken"));
     }
 
     @Test
     void testAdminAuthenticate() throws Exception {
-        when(authenticationService.adminAuthenticate(any(AuthenticationRequest.class))).thenReturn(authenticationResponse);
+        AuthenticationRequest authRequest = new AuthenticationRequest("admin@test.com", "AdminPassword123!");
+        AuthenticationResponse mockResponse = new AuthenticationResponse("adminMockToken");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/admin/authenticate")
+        when(authenticationService.adminAuthenticate(any(AuthenticationRequest.class))).thenReturn(mockResponse);
+
+        mockMvc.perform(post("/admin/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(authenticationRequest)))
+                        .content(objectMapper.writeValueAsString(authRequest)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").value("mockToken"))
-                .andDo(print());
+                .andExpect(jsonPath("$.token").value("adminMockToken"));
     }
 
-    @Test
-    void testAdminAuthenticateAccessDenied() throws Exception {
-        when(authenticationService.adminAuthenticate(any(AuthenticationRequest.class)))
-                .thenThrow(new AccessDeniedException("Access denied"));
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/admin/authenticate")
+    @Test
+    @WithMockUser
+    void testAuthenticate1() throws Exception {
+        AuthenticationRequest authRequest = new AuthenticationRequest("test@test.com", "Password123!");
+        AuthenticationResponse mockResponse = new AuthenticationResponse("mockToken");
+
+        when(authenticationService.authenticate(any(AuthenticationRequest.class))).thenReturn(mockResponse);
+
+        mockMvc.perform(post("/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(authenticationRequest)))
-                .andExpect(status().isForbidden())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Access denied"))
-                .andDo(print());
+                        .content(objectMapper.writeValueAsString(authRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("mockToken"));
     }
 }

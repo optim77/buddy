@@ -2,6 +2,7 @@ package com.buddy.buddy.account.entity;
 
 
 import com.buddy.buddy.image.entity.Image;
+import com.buddy.buddy.subscription.entity.Subscription;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,6 +45,12 @@ public class User implements UserDetails {
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     Set<Image> photos = new HashSet<>();
+
+    @OneToMany(mappedBy = "subscriber", cascade = CascadeType.ALL)
+    private Set<Subscription> subscriptions = new HashSet<>();
+
+    @OneToMany(mappedBy = "subscribedTo", cascade = CascadeType.ALL)
+    private Set<Subscription> subscribers = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private Role role;
