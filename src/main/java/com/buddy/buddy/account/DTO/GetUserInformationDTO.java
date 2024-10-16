@@ -24,7 +24,7 @@ public class GetUserInformationDTO {
     private UUID id;
     private String username;
     private String description;
-    private short age;
+    private int age;
     private String avatar;
     private Date createdAt;
 

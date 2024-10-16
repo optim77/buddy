@@ -1,7 +1,6 @@
 package com.buddy.buddy.subscription.entity;
 
 import com.buddy.buddy.account.entity.User;
-import com.buddy.buddy.image.entity.Image;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,9 +1,22 @@
 package com.buddy.buddy.account.controller;
 
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
+import com.buddy.buddy.account.DTO.UpdateUserInformationDTO;
+import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.account.repository.UserRepository;
+import com.buddy.buddy.account.service.AccountService;
+import com.buddy.buddy.account.service.Implementation.AccountServiceImplementation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -13,10 +26,13 @@ import java.util.UUID;
 @RequestMapping(produces = "application/json")
 public class UserController {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private final AccountService accountService;
+    @Autowired
+    private UserRepository userRepository;
 
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserController(AccountService accountService) {
+        this.accountService = accountService;
     }
 
     @GetMapping("/hello_world")
@@ -24,15 +40,33 @@ public class UserController {
         return "Hello World";
     }
 
-    @PostMapping("/user/{userId}")
+    @GetMapping("/user/{userId}")
     private ResponseEntity<GetUserInformationDTO> getUserInformation(@PathVariable UUID userId) {
-        return userRepository.findById(userId).map(user -> {
-            if (user.isLocked()){
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "User is locked");
-            }
-            GetUserInformationDTO getUserDTO = new GetUserInformationDTO(user);
-            getUserDTO.setId(user.getId());
-            return ResponseEntity.ok(getUserDTO);
-        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return accountService.getAccount(userId);
     }
+
+    @GetMapping("/user/list")
+    private ResponseEntity<Page<GetUserInformationDTO>> getUserInformationListRandom(Pageable pageable) {
+        return accountService.getUserListRandom(pageable);
+    }
+
+    @GetMapping("/user/list/{criteria}")
+    private ResponseEntity<Page<GetUserInformationDTO>> getUserInformationListByCriteria(Pageable pageable, @PathVariable String criteria) {
+        return accountService.getUserListByCriteria(criteria, pageable);
+    }
+
+    @GetMapping("/user/search")
+    public ResponseEntity<Page<GetUserInformationDTO>> searchUsersByUsername(
+            @RequestParam("username") String username,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        return accountService.searchUser(username, pageable);
+    }
+
+    @PutMapping("/user/update")
+    public ResponseEntity<HttpStatus> updateUser(@RequestBody UpdateUserInformationDTO userDTO, @AuthenticationPrincipal User principal) {
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return accountService.updateUser(userDTO, user);
+    }
+
 }

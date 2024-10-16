@@ -15,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
+import java.util.Random;
+import java.util.random.RandomGenerator;
+
 import org.slf4j.Logger;
 import org.springframework.util.StringUtils;
 
@@ -36,13 +39,13 @@ public class AuthenticationService {
         if(isValidPassword(request.getPassword())) {
             return ResponseEntity.badRequest().body(new AuthenticationResponse("Password does not meet the requirements (8-32 characters, upper and lower case, special character)")).getBody();
         }
-        boolean isExist = userRepository.existsByEmail(request.getEmail());
-        if(!isExist){
+        boolean isExistEmail = userRepository.existsByEmail(request.getEmail());
+        if(!isExistEmail){
             logger.debug("User not found - creating a new user");
             User user = new User();
             user.setEmail(request.getEmail());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setUsername(request.getEmail());
+            user.setUsername(request.getEmail().split("@")[0]);
             user.setActive(false);
             user.setRole(Role.USER);
             userRepository.save(user);

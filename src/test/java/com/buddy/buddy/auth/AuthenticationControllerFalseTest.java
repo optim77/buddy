@@ -1,10 +1,8 @@
-package com.buddy.buddy.authTest;
+package com.buddy.buddy.auth;
 
-import com.buddy.buddy.auth.AuthenticationService;
 import com.buddy.buddy.auth.DTO.AuthenticationRequest;
 import com.buddy.buddy.auth.DTO.AuthenticationResponse;
 import com.buddy.buddy.auth.DTO.RegisterRequest;
-import com.buddy.buddy.auth.JwtUtils;
 import com.buddy.buddy.auth.controller.AuthenticationController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;

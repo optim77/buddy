@@ -2,6 +2,7 @@ package com.buddy.buddy.account.entity;
 
 
 import com.buddy.buddy.image.entity.Image;
+import com.buddy.buddy.like.entity.Like;
 import com.buddy.buddy.subscription.entity.Subscription;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.Valid;
 import java.util.*;
 
 @Entity
@@ -29,28 +31,35 @@ public class User implements UserDetails {
     private String email;
 
     @Column(nullable = false, unique = true)
+
     private String username;
 
-    @Column(length = 1000)
+    @Column(length = 1000, nullable = true)
     private String description;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private short age;
+    @Column(nullable = true)
+    private int age;
 
     @Column
     private String avatar;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    Set<Image> photos = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Image> images;
 
     @OneToMany(mappedBy = "subscriber", cascade = CascadeType.ALL)
     private Set<Subscription> subscriptions = new HashSet<>();
 
     @OneToMany(mappedBy = "subscribedTo", cascade = CascadeType.ALL)
     private Set<Subscription> subscribers = new HashSet<>();
+
+    @Column
+    private int subscribersCount;
+
+    @Column
+    private int subscriptionsCount;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -66,6 +75,9 @@ public class User implements UserDetails {
 
     @Column(nullable = false, unique = false)
     private Date createdAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Like> likes;
 
     @PrePersist
     private void createdAt(){
