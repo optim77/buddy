@@ -40,7 +40,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = true)
+    @Column()
     private int age;
 
     @Column
@@ -62,16 +62,16 @@ public class User implements UserDetails {
     private int subscriptionsCount;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.USER;
 
     @Column
-    private boolean deleted;
+    private boolean deleted = false;
 
     @Column
-    private boolean locked;
+    private boolean locked = false;
 
     @Column
-    private boolean active;
+    private boolean active = true;
 
     @Column(nullable = false, unique = false)
     private Date createdAt;

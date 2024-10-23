@@ -3,6 +3,7 @@ package com.buddy.buddy.auth;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.slf4j.Logger;
 
 @Component
 public class JwtUtils {
@@ -22,6 +24,8 @@ public class JwtUtils {
 
     @Value("${buddy.auth.expiration_time}")
     private  long EXPIRATION_TIME;
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class.getName());
 
     public String extractUsername(String token){
         return extractClaim(token, Claims::getSubject);

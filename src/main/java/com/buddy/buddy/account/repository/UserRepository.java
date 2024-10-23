@@ -31,4 +31,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Page<GetUserInformationDTO> findAllByPopularity(Pageable pageable);
     @Query("SELECT u FROM User u WHERE u.deleted = false AND u.locked = false  AND u.active = true ORDER BY u.createdAt DESC ")
     Page<GetUserInformationDTO> findAllByCreatedAt(Pageable pageable);
+    @Query("SELECT true FROM User u WHERE u.deleted = false AND u.locked = false AND u.active = true AND u.id = :id")
+    boolean userIsActiveById(@Param("id") UUID id);
 }

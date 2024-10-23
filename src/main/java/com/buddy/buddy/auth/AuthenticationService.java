@@ -46,7 +46,8 @@ public class AuthenticationService {
             user.setEmail(request.getEmail());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
             user.setUsername(request.getEmail().split("@")[0]);
-            user.setActive(false);
+            //change in prod to false
+            user.setActive(true);
             user.setRole(Role.USER);
             userRepository.save(user);
             String token = jwtUtils.generateToken(user);

@@ -30,20 +30,20 @@ public class Image {
     @Column(nullable = false, unique = true)
     private Date uploadedDate = new Date();
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    User account;
-
-    @Column(nullable = false, unique = true)
+    @Column()
     private String description;
-
-    @Column(nullable = true)
-    private Date publishedDate;
 
     @Column(nullable = false)
     private int likeCount = 0;
 
     @Column
     private boolean open;
+
+    @Column(nullable = false)
+    private String url;
+
+    @Column
+    private boolean deleted = false;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

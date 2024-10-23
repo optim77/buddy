@@ -68,14 +68,14 @@ public class ImageTest {
         image.setLikeCount(12);
         image.setOpen(true);
         image.setId(UUID.randomUUID());
-        image.setPublishedDate(new Date());
+        //image.setPublishedDate(new Date());
         image_uuid = image.getId();
 
         getImageDTO = new GetImageDTO(image, user);
 
         when(imageRepository.findById(image_uuid)).thenReturn(Optional.of(image));
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(imageService.getImage(image_uuid)).thenReturn(new ResponseEntity<>(getImageDTO, HttpStatus.OK));
+        //when(imageService.getImage(image_uuid)).thenReturn(new ResponseEntity<>(getImageDTO, HttpStatus.OK));
     }
 
     @Test
