@@ -64,4 +64,20 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
     @Query("UPDATE Image i SET i.deleted = true WHERE i.id = :imageId")
     void setDeleteImageById(@Param("imageId") UUID imageId);
 
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, i.user.id, i.user.username, i.user.avatar, i.user.createdAt, false) " +
+            "FROM Image i " +
+            "JOIN i.tags t  " +
+            "WHERE i.user.locked = false AND i.user.deleted = false AND i.user.active = true AND i.deleted = false AND t.name = :tag AND i.open = true ORDER BY RANDOM()")
+    Page<ImageWithUserLikeDTO> findOpenImagesByTagNotLoggedUser(@Param("tag") String tag, Pageable pageable);
+
+
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, " +
+            "CASE WHEN (l IS NOT NULL) THEN true ELSE false END) " +
+            "FROM Image i " +
+            "JOIN i.user u " +
+            "JOIN i.tags t  " +
+            "LEFT JOIN Like l ON l.image.id = i.id AND l.user.id = :user_id " +
+            "WHERE i.user.id = :authorId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND t.name = :tag AND i.open = true ORDER BY RANDOM()")
+    Page<ImageWithUserLikeDTO> findOpenImagesByTagLoggedUser(@Param("tag") String tag, @Param("user_id") UUID user_id, Pageable pageable);
+
 }

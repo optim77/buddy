@@ -18,4 +18,5 @@ public interface ImageService {
     ResponseEntity<UUID> uploadImage(UploadImageDTO uploadImageDTO, User user);
     ResponseEntity<HttpStatus> updateImage(UploadImageDTO uploadImageDTO, UUID image_id, User user);
     ResponseEntity<HttpStatus> deleteImage(UUID imageId, User user);
+    ResponseEntity<Page<ImageWithUserLikeDTO>> getImagesByTag(String tag, User user, Pageable pageable);
 }

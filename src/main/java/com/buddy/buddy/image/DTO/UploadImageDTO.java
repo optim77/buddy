@@ -15,5 +15,5 @@ public class UploadImageDTO {
     private String description;
     private boolean open;
     private MultipartFile file;
-    private Set<UUID> tagSet;
+    private Set<String> tagSet;
 }

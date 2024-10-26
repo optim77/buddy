@@ -42,7 +42,11 @@ public class ImageController {
         return imageService.getUserImages(authorId, user, pageable);
     }
 
-    //@GetMapping("/image/open/tag/{tag_id}")
+    @GetMapping("/image/open/tag/{tag_id}")
+    private ResponseEntity<Page<ImageWithUserLikeDTO>> getImagesByTag(@PathVariable String tag_id, @AuthenticationPrincipal User user, Pageable pageable) {
+        return imageService.getImagesByTag(tag_id, user, pageable);
+    }
+
     //@GetMapping("/image/open/criteria/{random/popularity}")
 
     @PostMapping("/image/upload")

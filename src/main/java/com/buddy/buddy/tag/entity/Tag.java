@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -20,10 +21,7 @@ import java.util.UUID;
 public class Tag {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @Column
+    @Column(unique = true, nullable = false)
     private String name;
 
     @Column

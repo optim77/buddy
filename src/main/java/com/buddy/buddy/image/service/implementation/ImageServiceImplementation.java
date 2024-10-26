@@ -7,6 +7,8 @@ import com.buddy.buddy.image.entity.Image;
 import com.buddy.buddy.image.repository.ImageRepository;
 import com.buddy.buddy.image.service.ImageService;
 import com.buddy.buddy.subscription.repository.SubscriptionRepository;
+import com.buddy.buddy.tag.entity.Tag;
+import com.buddy.buddy.tag.repository.TagRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +21,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -28,10 +32,12 @@ public class ImageServiceImplementation implements ImageService {
     private final ImageRepository imageRepository;
     private final SubscriptionRepository subscriptionRepository;
     private static final Logger logger = LoggerFactory.getLogger(ImageServiceImplementation.class.getName());
+    private final TagRepository tagRepository;
 
-    public ImageServiceImplementation(ImageRepository imageRepository, SubscriptionRepository subscriptionRepository) {
+    public ImageServiceImplementation(ImageRepository imageRepository, SubscriptionRepository subscriptionRepository, TagRepository tagRepository) {
         this.imageRepository = imageRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.tagRepository = tagRepository;
     }
 
     @Override
@@ -98,13 +104,17 @@ public class ImageServiceImplementation implements ImageService {
             logger.debug("Creating and saving media");
             Image image = new Image();
             image.setUploadedDate(new Date());
-            //image.setTags(uploadImageDTO.getTagSet());
-//            Set<Tag> tags = uploadImageDTO.getTagSet().stream()
-//                    .map(tagRepository::findById)
-//                    .filter(Optional::isPresent)
-//                    .map(Optional::get)
-//                    .collect(Collectors.toSet());
-//            image.setTags(tags);
+            Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
+                Optional<Tag> existed_tag = tagRepository.findById(tag);
+                if (existed_tag.isPresent()) {
+                    return existed_tag.get();
+                }else {
+                    Tag new_tag = new Tag();
+                    new_tag.setName(tag);
+                    return tagRepository.save(new_tag);
+                }
+            }).collect(Collectors.toSet());
+            image.setTags(tags);
             image.setDescription(uploadImageDTO.getDescription());
             image.setUser(user);
             //check and save file
@@ -153,6 +163,25 @@ public class ImageServiceImplementation implements ImageService {
             }
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized");
+    }
+
+    @Override
+    public ResponseEntity<Page<ImageWithUserLikeDTO>> getImagesByTag(String tag, User user, Pageable pageable) {
+        try {
+            if (user != null){
+                logger.info("Logged user - getImagesByTag");
+                Page<ImageWithUserLikeDTO> images = imageRepository.findOpenImagesByTagLoggedUser(tag, user.getId(), pageable);
+                return new ResponseEntity<>(images, HttpStatus.OK);
+            }else {
+                logger.info("No logged user - getImagesByTag");
+                Page<ImageWithUserLikeDTO> images = imageRepository.findOpenImagesByTagNotLoggedUser(tag, pageable);
+                return new ResponseEntity<>(images, HttpStatus.OK);
+            }
+        }catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+
     }
 
 
