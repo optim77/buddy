@@ -4,8 +4,10 @@ package com.buddy.buddy.image.controller;
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.image.DTO.GetImageDTO;
+import com.buddy.buddy.image.DTO.ImageWithUserLikeAndTagsDTO;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.DTO.UploadImageDTO;
+import com.buddy.buddy.image.entity.Image;
 import com.buddy.buddy.image.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +35,7 @@ public class ImageController {
     }
 
     @GetMapping("/image/{image_id}")
-    private ResponseEntity<ImageWithUserLikeDTO> getSingleImage(@PathVariable UUID image_id, @AuthenticationPrincipal User user) {
+    private ResponseEntity<ImageWithUserLikeAndTagsDTO> getSingleImage(@PathVariable UUID image_id, @AuthenticationPrincipal User user) {
         return imageService.getImage(image_id, user);
 
     }
@@ -43,11 +46,14 @@ public class ImageController {
     }
 
     @GetMapping("/image/open/tag/{tag_id}")
-    private ResponseEntity<Page<ImageWithUserLikeDTO>> getImagesByTag(@PathVariable String tag_id, @AuthenticationPrincipal User user, Pageable pageable) {
+    private ResponseEntity<Page<ImageWithUserLikeDTO>> getOpenImagesByTag(@PathVariable String tag_id, @AuthenticationPrincipal User user, Pageable pageable) {
         return imageService.getImagesByTag(tag_id, user, pageable);
     }
 
-    //@GetMapping("/image/open/criteria/{random/popularity}")
+    @GetMapping("/image/open/random")
+    private ResponseEntity<Page<ImageWithUserLikeDTO>> getOpenImagesRandom(@AuthenticationPrincipal User user, Pageable pageable) {
+        return imageService.getImagesRandom(user, pageable);
+    }
 
     @PostMapping("/image/upload")
     private ResponseEntity<UUID> uploadImage(@RequestBody UploadImageDTO uploadImageDTO, @AuthenticationPrincipal User user) {

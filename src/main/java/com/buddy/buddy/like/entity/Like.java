@@ -34,11 +34,11 @@ public class Like {
     private Image image;
 
     @Column
-    private Date likedDate;
+    private LocalDate likedDate;
 
     @PrePersist
     private void createdAt(){
-        this.likedDate = new Date();
+        this.likedDate = LocalDate.now();
     }
 
 

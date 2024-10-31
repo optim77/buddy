@@ -27,9 +27,5 @@ public class Tag {
     @Column
     private int count;
 
-    @ManyToOne
-    private Image image;
 
-    @ManyToMany(mappedBy = "tags")
-    private Set<Image> images = new HashSet<>();
 }

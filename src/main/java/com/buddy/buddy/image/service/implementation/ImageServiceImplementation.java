@@ -1,6 +1,7 @@
 package com.buddy.buddy.image.service.implementation;
 
 import com.buddy.buddy.account.entity.User;
+import com.buddy.buddy.image.DTO.ImageWithUserLikeAndTagsDTO;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.DTO.UploadImageDTO;
 import com.buddy.buddy.image.entity.Image;
@@ -41,27 +42,31 @@ public class ImageServiceImplementation implements ImageService {
     }
 
     @Override
-    public ResponseEntity<ImageWithUserLikeDTO> getImage(UUID imageId, User user) {
+    public ResponseEntity<ImageWithUserLikeAndTagsDTO> getImage(UUID imageId, User user) {
         if (user != null) {
             logger.info("Getting image by logged user");
             return imageRepository.findImageByIdWithUserAndLikeStatus(imageId, user.getId())
                     .map(dto -> {
+                        Set<String> tags = imageRepository.findTagsByImageId(imageId);
+                        ImageWithUserLikeAndTagsDTO imageWithUserLikeAndTagsDTO = new ImageWithUserLikeAndTagsDTO(dto, tags);
                         if (dto.isOpen() || isSubscriber(user.getId(), dto.getUserId())) {
-                            return new ResponseEntity<>(dto, HttpStatus.OK);
+                            return new ResponseEntity<>(imageWithUserLikeAndTagsDTO, HttpStatus.OK);
                         }
                         dto.setImageUrl("-");
-                        return new ResponseEntity<>(dto, HttpStatus.OK);
+                        return new ResponseEntity<>(imageWithUserLikeAndTagsDTO, HttpStatus.OK);
                     })
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found"));
         } else {
             logger.info("Getting image by not logged user");
             return imageRepository.findImageByIdWithUserForNotLoggedUser(imageId)
                     .map(dto -> {
+                        Set<String> tags = imageRepository.findTagsByImageId(imageId);
+                        ImageWithUserLikeAndTagsDTO imageWithUserLikeAndTagsDTO = new ImageWithUserLikeAndTagsDTO(dto, tags);
                         if (dto.isOpen()) {
-                            return new ResponseEntity<>(dto, HttpStatus.OK);
+                            return new ResponseEntity<>(imageWithUserLikeAndTagsDTO, HttpStatus.OK);
                         }
                         dto.setImageUrl("-");
-                        return new ResponseEntity<>(dto, HttpStatus.OK);
+                        return new ResponseEntity<>(imageWithUserLikeAndTagsDTO, HttpStatus.OK);
                     })
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found"));
         }
@@ -99,12 +104,12 @@ public class ImageServiceImplementation implements ImageService {
 
     @Override
     public ResponseEntity<UUID> uploadImage(UploadImageDTO uploadImageDTO, User user) {
-        // TODO: implement adding tag to image
         try {
             logger.debug("Creating and saving media");
             Image image = new Image();
             image.setUploadedDate(new Date());
             Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
+
                 Optional<Tag> existed_tag = tagRepository.findById(tag);
                 if (existed_tag.isPresent()) {
                     return existed_tag.get();
@@ -140,6 +145,22 @@ public class ImageServiceImplementation implements ImageService {
             if (uploadImageDTO.isOpen() != image.isOpen()) {
                 image.setOpen(uploadImageDTO.isOpen());
             }
+            Set<String> currentTagNames = image.getTags().stream()
+                    .map(Tag::getName)
+                    .collect(Collectors.toSet());
+            if (!uploadImageDTO.getTagSet().equals(currentTagNames)){
+                Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
+                    Optional<Tag> existed_tag = tagRepository.findById(tag);
+                    if (existed_tag.isPresent()) {
+                        return existed_tag.get();
+                    }else {
+                        Tag new_tag = new Tag();
+                        new_tag.setName(tag);
+                        return tagRepository.save(new_tag);
+                    }
+                }).collect(Collectors.toSet());
+                image.setTags(tags);
+            }
             imageRepository.save(image);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }catch (Exception e) {
@@ -169,11 +190,11 @@ public class ImageServiceImplementation implements ImageService {
     public ResponseEntity<Page<ImageWithUserLikeDTO>> getImagesByTag(String tag, User user, Pageable pageable) {
         try {
             if (user != null){
-                logger.info("Logged user - getImagesByTag");
+                logger.debug("Logged user - getImagesByTag");
                 Page<ImageWithUserLikeDTO> images = imageRepository.findOpenImagesByTagLoggedUser(tag, user.getId(), pageable);
                 return new ResponseEntity<>(images, HttpStatus.OK);
             }else {
-                logger.info("No logged user - getImagesByTag");
+                logger.debug("No logged user - getImagesByTag");
                 Page<ImageWithUserLikeDTO> images = imageRepository.findOpenImagesByTagNotLoggedUser(tag, pageable);
                 return new ResponseEntity<>(images, HttpStatus.OK);
             }
@@ -184,8 +205,26 @@ public class ImageServiceImplementation implements ImageService {
 
     }
 
+    @Override
+    public ResponseEntity<Page<ImageWithUserLikeDTO>> getImagesRandom(User user, Pageable pageable) {
+        try {
+            if (user != null){
+                logger.debug("Logged user - getImagesRandom");
+                Page<ImageWithUserLikeDTO> images = imageRepository.findOpenImagesByRandomLoggedUser(user.getId(), pageable);
+                return new ResponseEntity<>(images, HttpStatus.OK);
+            }else {
+                logger.debug("No logged user - getImagesRandom");
+                Page<ImageWithUserLikeDTO> image = imageRepository.findOpenImagesByRandomNotLoggedUser(pageable);
+                return new ResponseEntity<>(image, HttpStatus.OK);
+            }
+        }catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    }
 
-    private boolean isSubscriber(UUID userID, UUID imageID) {
+
+    public boolean isSubscriber(UUID userID, UUID imageID) {
         Optional<User> user = imageRepository.findUserByPhotoId(imageID);
         if (user.isPresent()) {
             return subscriptionRepository.existsBySubscriberAndSubscribedTo(userID, user.get().getId());

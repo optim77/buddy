@@ -1,18 +1,19 @@
 package com.buddy.buddy.image.DTO;
 
+import com.buddy.buddy.tag.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ImageWithUserLikeDTO   {
+
     private UUID imageId;
     private String imageUrl;
     private String description;
@@ -25,4 +26,8 @@ public class ImageWithUserLikeDTO   {
     private String avatar;
     private Date userCreatedAt;
     private boolean likedByCurrentUser = false;
+
+
+
+
 }
