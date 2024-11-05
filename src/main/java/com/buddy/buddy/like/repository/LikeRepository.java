@@ -18,7 +18,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
 
     @Query("SELECT true FROM Like l WHERE l.image.id = :image_id AND l.user.id = :user_id")
-    boolean isLikedByUser(@Param("image_id") UUID image_id, @Param("user_id") UUID user_id);
+    Optional<Like> isLikedByUser(@Param("image_id") UUID image_id, @Param("user_id") UUID user_id);
 
     @Modifying
     @Query("DELETE FROM Like l WHERE l.image.id = :image_id AND l.user.id = :user_id")

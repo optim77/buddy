@@ -30,8 +30,8 @@ public class LikeController {
         return likeService.likeImage(image_id, user);
     }
 
-    @GetMapping("/like/images/{user_id}")
-    private ResponseEntity<Page<ImageWithUserLikeDTO>> getLikedImages(@PathVariable UUID user_id, Pageable pageable) {
-        return likeService.likedImages(user_id, pageable);
+    @GetMapping("/like/images")
+    private ResponseEntity<Page<ImageWithUserLikeDTO>> getLikedImages(@AuthenticationPrincipal User user, Pageable pageable) {
+        return likeService.likedImages(user, pageable);
     }
 }

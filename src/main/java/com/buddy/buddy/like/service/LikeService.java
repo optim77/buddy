@@ -12,6 +12,6 @@ import java.util.UUID;
 public interface LikeService {
 
     ResponseEntity<HttpStatus> likeImage(UUID image_id, User user);
-    ResponseEntity<Page<ImageWithUserLikeDTO>> likedImages(UUID user_id, Pageable pageable);
+    ResponseEntity<Page<ImageWithUserLikeDTO>> likedImages(User user, Pageable pageable);
 
 }

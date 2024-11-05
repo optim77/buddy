@@ -4,6 +4,7 @@ import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.auth.JwtUtils;
 import com.buddy.buddy.image.DTO.GetImageDTO;
+import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.controller.ImageController;
 import com.buddy.buddy.image.entity.Image;
 import com.buddy.buddy.image.repository.ImageRepository;
@@ -15,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +56,7 @@ public class ImageTest {
     private ImageRepository imageRepository;
 
     private UUID image_uuid;
+    private UUID user_uuid;
     private GetImageDTO getImageDTO;
 
     @BeforeEach
@@ -61,6 +66,8 @@ public class ImageTest {
         user.setPassword("password");
         user.setEmail("buddy@buddy.com");
         user.setDescription("lorem ipsum");
+        user_uuid = UUID.randomUUID();
+        user.setId(user_uuid);
 
         Image image = new Image();
         image.setUser(user);
@@ -73,13 +80,16 @@ public class ImageTest {
 
         getImageDTO = new GetImageDTO(image, user);
 
+        Pageable pageable = PageRequest.of(0, 10);
+
         when(imageRepository.findById(image_uuid)).thenReturn(Optional.of(image));
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         //when(imageService.getImage(image_uuid)).thenReturn(new ResponseEntity<>(getImageDTO, HttpStatus.OK));
+
     }
 
     @Test
-    void searchImage() throws Exception {
+    void getSingleImageTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.get("/image/" + image_uuid)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

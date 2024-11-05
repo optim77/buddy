@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.UUID;
 
@@ -22,10 +23,10 @@ public class Subscription {
     private UUID id;
 
     @Column(nullable = false)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(nullable = false)
-    private Date endDate;
+    private LocalDate endDate;
 
     @Column(nullable = false)
     private double price;
@@ -37,5 +38,11 @@ public class Subscription {
     @ManyToOne
     @JoinColumn(nullable = false)
     private User subscribedTo;
+
+    @Column
+    private boolean cancelled = false;
+
+    @Column
+    private boolean active;
 
 }

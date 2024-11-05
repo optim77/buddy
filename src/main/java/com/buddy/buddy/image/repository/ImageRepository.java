@@ -4,6 +4,7 @@ import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.entity.Image;
 import com.buddy.buddy.tag.entity.Tag;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -90,6 +91,16 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
 
     @Query("SELECT t.name FROM Image i JOIN i.tags t WHERE i.id = :image_id")
     Set<String> findTagsByImageId(@Param("image_id") UUID image_id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Image i SET i.likeCount = i.likeCount + 1 WHERE i.id = :image_id")
+    void incrementLikesCount(@Param("image_id") UUID image_id);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Image i SET i.likeCount = i.likeCount - 1 WHERE i.id = :image_id")
+    void decrementLikesCount(@Param("image_id") UUID image_id);
 
 
 }
