@@ -70,7 +70,7 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
             "JOIN i.user u " +
             "JOIN i.tags t  " +
             "LEFT JOIN Like l ON l.image.id = i.id AND l.user.id = :user_id " +
-            "WHERE i.user.id = :authorId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND t.name = :tag AND i.open = true ORDER BY RANDOM()")
+            "WHERE i.user.id = :user_id AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND t.name = :tag AND i.open = true ORDER BY RANDOM()")
     Page<ImageWithUserLikeDTO> findOpenImagesByTagLoggedUser(@Param("tag") String tag, @Param("user_id") UUID user_id, Pageable pageable);
 
 
@@ -79,14 +79,12 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
             "FROM Image i " +
             "JOIN i.user u " +
             "LEFT JOIN Like l ON l.image.id = i.id AND l.user.id = :user_id " +
-            "WHERE i.user.id = :authorId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
+            "WHERE i.user.id = :user_id AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
     Page<ImageWithUserLikeDTO> findOpenImagesByRandomLoggedUser(@Param("user_id") UUID user_id, Pageable pageable);
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, false) " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, i.user.id, i.user.username, i.user.avatar, i.user.createdAt, false) " +
             "FROM Image i " +
-            "JOIN i.user u " +
-            "LEFT JOIN Like l ON l.image.id = i.id AND l.user.id = :user_id " +
-            "WHERE u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
+            "WHERE i.user.locked = false AND i.user.deleted = false AND i.user.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
     Page<ImageWithUserLikeDTO> findOpenImagesByRandomNotLoggedUser(Pageable pageable);
 
     @Query("SELECT t.name FROM Image i JOIN i.tags t WHERE i.id = :image_id")

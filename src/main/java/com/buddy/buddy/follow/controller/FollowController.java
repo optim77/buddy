@@ -2,7 +2,6 @@ package com.buddy.buddy.follow.controller;
 
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
-import com.buddy.buddy.follow.repository.FollowRepository;
 import com.buddy.buddy.follow.servce.FollowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

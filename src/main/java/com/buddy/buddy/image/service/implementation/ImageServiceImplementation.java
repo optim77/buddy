@@ -18,8 +18,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +40,7 @@ public class ImageServiceImplementation implements ImageService {
     private final SubscriptionRepository subscriptionRepository;
     private static final Logger logger = LoggerFactory.getLogger(ImageServiceImplementation.class.getName());
     private final TagRepository tagRepository;
+    static final String UPLOAD_DIR = "C:\\Dev\\projekty\\Buddy\\buddy\\src\\main\\resources\\";
 
     public ImageServiceImplementation(ImageRepository imageRepository, SubscriptionRepository subscriptionRepository, TagRepository tagRepository) {
         this.imageRepository = imageRepository;
@@ -104,34 +111,80 @@ public class ImageServiceImplementation implements ImageService {
 
     @Override
     public ResponseEntity<UUID> uploadImage(UploadImageDTO uploadImageDTO, User user) {
+
         try {
             logger.debug("Creating and saving media");
+            logger.debug("Received DTO: file={}, description={}, tags={}, open={}",
+                    uploadImageDTO.getFile(),
+                    uploadImageDTO.getDescription(),
+                    uploadImageDTO.getTagSet(),
+                    uploadImageDTO.isOpen());
+
+            MultipartFile file = uploadImageDTO.getFile();
+            validateFile(file);
+
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            String fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase();
+            String savedFileName = UUID.randomUUID().toString() + "." + fileExtension;
+            Path filePath = uploadPath.resolve(savedFileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
             Image image = new Image();
             image.setUploadedDate(new Date());
-            Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
+            image.setDescription(uploadImageDTO.getDescription());
+            image.setUser(user);
+            image.setUrl(filePath.toString());
+            image.setOpen(uploadImageDTO.isOpen());
 
-                Optional<Tag> existed_tag = tagRepository.findById(tag);
-                if (existed_tag.isPresent()) {
-                    return existed_tag.get();
-                }else {
-                    Tag new_tag = new Tag();
-                    new_tag.setName(tag);
-                    return tagRepository.save(new_tag);
+            Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
+                Optional<Tag> existingTag = tagRepository.findById(tag);
+                if (existingTag.isPresent()) {
+                    return existingTag.get();
+                } else {
+                    Tag newTag = new Tag();
+                    newTag.setName(tag);
+                    return tagRepository.save(newTag);
                 }
             }).collect(Collectors.toSet());
             image.setTags(tags);
-            image.setDescription(uploadImageDTO.getDescription());
-            image.setUser(user);
-            //check and save file
-            image.setUrl("url");
-            image.setOpen(uploadImageDTO.isOpen());
+
             UUID imageId = imageRepository.save(image).getId();
             return new ResponseEntity<>(imageId, HttpStatus.CREATED);
+
+        } catch (IOException e) {
+            logger.error("File upload failed: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save file");
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
+    }
 
+    private void validateFile(MultipartFile file) {
+        final Set<String> allowedExtensions = Set.of("jpg", "jpeg", "png", "gif", "mp4", "mov");
+        final long maxFileSize = 100 * 1024 * 1024; // 100 MB
+
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file provided");
+        }
+
+        String fileName = file.getOriginalFilename();
+        if (fileName == null || fileName.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File name is missing");
+        }
+
+        String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        if (!allowedExtensions.contains(fileExtension)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid file extension. Allowed extensions: " + allowedExtensions);
+        }
+
+        if (file.getSize() > maxFileSize) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File size exceeds the limit of " + (maxFileSize / (1024 * 1024)) + " MB");
+        }
     }
 
     @Override
@@ -161,6 +214,9 @@ public class ImageServiceImplementation implements ImageService {
                 }).collect(Collectors.toSet());
                 image.setTags(tags);
             }
+
+            MultipartFile file = uploadImageDTO.getFile();
+
             imageRepository.save(image);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }catch (Exception e) {

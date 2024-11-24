@@ -1,6 +1,7 @@
 package com.buddy.buddy.account.controller;
 
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
+import com.buddy.buddy.account.DTO.ProfileInformationDTO;
 import com.buddy.buddy.account.DTO.UpdateUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.account.repository.UserRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -62,11 +64,18 @@ public class UserController {
         return accountService.searchUser(username, pageable);
     }
 
-    @PutMapping("/user/update")
-    public ResponseEntity<HttpStatus> updateUser(@RequestBody UpdateUserInformationDTO userDTO, @AuthenticationPrincipal User principal) {
+    @PutMapping(value = "/user/update")
+    public ResponseEntity<HttpStatus> updateUser(@ModelAttribute UpdateUserInformationDTO userDTO, @AuthenticationPrincipal User principal) {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         return accountService.updateUser(userDTO, user);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<ProfileInformationDTO> getProfileInformation(@AuthenticationPrincipal User user) {
+        User fetched = userRepository.findById(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return accountService.getProfileInformation(fetched.getId());
     }
 
 }

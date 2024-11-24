@@ -56,7 +56,7 @@ public class ImageController {
     }
 
     @PostMapping("/image/upload")
-    private ResponseEntity<UUID> uploadImage(@RequestBody UploadImageDTO uploadImageDTO, @AuthenticationPrincipal User user) {
+    private ResponseEntity<UUID> uploadImage(@ModelAttribute UploadImageDTO uploadImageDTO, @AuthenticationPrincipal User user) {
         return imageService.uploadImage(uploadImageDTO, user);
     }
 

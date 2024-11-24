@@ -8,6 +8,7 @@ import com.buddy.buddy.auth.DTO.AuthenticationResponse;
 import com.buddy.buddy.auth.DTO.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,13 +32,13 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
-    public AuthenticationResponse register(RegisterRequest request){
+    public ResponseEntity<AuthenticationResponse> register(RegisterRequest request){
         logger.info("Registering user");
         if (!StringUtils.hasText(request.getEmail()) || isValidEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().body(new AuthenticationResponse("Invalid email format")).getBody();
+            return new ResponseEntity<>(new AuthenticationResponse("", "Invalid email format"), HttpStatus.BAD_REQUEST);
         }
         if(isValidPassword(request.getPassword())) {
-            return ResponseEntity.badRequest().body(new AuthenticationResponse("Password does not meet the requirements (8-32 characters, upper and lower case, special character)")).getBody();
+            return new ResponseEntity<>(new AuthenticationResponse("", "Password does not meet the requirements (8-32 characters, upper and lower case, special character)"), HttpStatus.BAD_REQUEST);
         }
         boolean isExistEmail = userRepository.existsByEmail(request.getEmail());
         if(!isExistEmail){
@@ -51,20 +52,20 @@ public class AuthenticationService {
             user.setRole(Role.USER);
             userRepository.save(user);
             String token = jwtUtils.generateToken(user);
-            return AuthenticationResponse.builder().token(token).build();
+            return new ResponseEntity<>(AuthenticationResponse.builder().token(token).build(), HttpStatus.CREATED);
         }else{
             logger.debug("User already exists - {}", request.getEmail());
-            return AuthenticationResponse.builder().token("").build();
+            return new ResponseEntity<>(new AuthenticationResponse("", "Email is already in use"), HttpStatus.CONFLICT);
         }
 
     }
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest){
         logger.info("Authenticating user");
         if (!StringUtils.hasText(authenticationRequest.getEmail()) || isValidEmail(authenticationRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(new AuthenticationResponse("Invalid email format")).getBody();
+            return ResponseEntity.badRequest().body(new AuthenticationResponse("", "Invalid email format")).getBody();
         }
         if(isValidPassword(authenticationRequest.getPassword())) {
-            return ResponseEntity.badRequest().body(new AuthenticationResponse("Password does not meet the requirements (8-32 characters, upper and lower case, special character)")).getBody();
+            return ResponseEntity.badRequest().body(new AuthenticationResponse("", "Password does not meet the requirements (8-32 characters, upper and lower case, special character)")).getBody();
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -79,10 +80,10 @@ public class AuthenticationService {
         logger.info("Authenticating admin user");
         if (!StringUtils.hasText(authenticationRequest.getEmail()) || isValidEmail(authenticationRequest.getEmail())) {
             logger.debug("Wrong email for admin login {}", authenticationRequest.getEmail());
-            return ResponseEntity.badRequest().body(new AuthenticationResponse("Invalid email format")).getBody();
+            return ResponseEntity.badRequest().body(new AuthenticationResponse("", "Invalid email format")).getBody();
         }
         if(isValidPassword(authenticationRequest.getPassword())) {
-            return ResponseEntity.badRequest().body(new AuthenticationResponse("Password does not meet the requirements (8-32 characters, upper and lower case, special character)")).getBody();
+            return ResponseEntity.badRequest().body(new AuthenticationResponse("", "Password does not meet the requirements (8-32 characters, upper and lower case, special character)")).getBody();
         }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

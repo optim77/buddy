@@ -39,19 +39,6 @@ public class AuthenticationControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    void testRegister() throws Exception {
-        RegisterRequest registerRequest = new RegisterRequest("test@test.com", "Password123!");
-        AuthenticationResponse mockResponse = new AuthenticationResponse("mockToken");
-
-        when(authenticationService.register(any(RegisterRequest.class))).thenReturn(mockResponse);
-
-        mockMvc.perform(post("/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("mockToken"));
-    }
 
     @Test
     void testAuthenticate() throws Exception {

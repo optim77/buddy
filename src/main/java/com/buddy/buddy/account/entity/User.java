@@ -40,7 +40,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column()
+    @Column
     private int age;
 
     @Column

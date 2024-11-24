@@ -1,6 +1,7 @@
 package com.buddy.buddy.account.service.Implementation;
 
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
+import com.buddy.buddy.account.DTO.ProfileInformationDTO;
 import com.buddy.buddy.account.DTO.UpdateUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.account.repository.UserRepository;
@@ -62,6 +63,15 @@ public class AccountServiceImplementation implements AccountService {
         }
         logger.debug("Insert wrong criteria");
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Wrong criteria provided");
+    }
+
+    @Override
+    public ResponseEntity<ProfileInformationDTO> getProfileInformation(UUID uuid) {
+        try{
+            return new ResponseEntity<>(userRepository.findProfileInformationById(uuid), HttpStatus.OK);
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
     }
 
     @Override

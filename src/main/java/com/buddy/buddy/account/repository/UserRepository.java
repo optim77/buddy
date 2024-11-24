@@ -1,6 +1,7 @@
 package com.buddy.buddy.account.repository;
 
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
+import com.buddy.buddy.account.DTO.ProfileInformationDTO;
 import com.buddy.buddy.account.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,4 +34,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Page<GetUserInformationDTO> findAllByCreatedAt(Pageable pageable);
     @Query("SELECT true FROM User u WHERE u.deleted = false AND u.locked = false AND u.active = true AND u.id = :id")
     boolean userIsActiveById(@Param("id") UUID id);
+
+    @Query("SELECT new com.buddy.buddy.account.DTO.ProfileInformationDTO(u.id, u.email, u.username, u.description, u.age, u.avatar, u.active, u.locked) FROM User u WHERE u.id = :user_id")
+    ProfileInformationDTO findProfileInformationById(@Param("user_id") UUID user_id);
 }

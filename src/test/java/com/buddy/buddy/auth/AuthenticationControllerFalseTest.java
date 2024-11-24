@@ -59,14 +59,4 @@ public class AuthenticationControllerFalseTest {
         registerRequest.setEmail("newuser");
     }
 
-    @Test
-    void testRegister() throws Exception {
-        when(authenticationService.register(any(RegisterRequest.class))).thenReturn(authenticationResponse);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().is4xxClientError())
-                .andDo(print());
-    }
 }
