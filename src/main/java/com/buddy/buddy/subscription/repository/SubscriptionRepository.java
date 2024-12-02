@@ -41,4 +41,5 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, UUID
 
     @Query("SELECT s FROM Subscription s WHERE s.endDate < :currentDate AND s.cancelled = false")
     List<Subscription> findSubscriptionToRenewal(LocalDate currentDate);
+
 }

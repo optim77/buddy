@@ -7,6 +7,9 @@ import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.account.service.AccountService;
 import com.buddy.buddy.account.service.Implementation.AccountServiceImplementation;
+import com.buddy.buddy.image.DTO.GetImageDTO;
+import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
+import com.buddy.buddy.image.entity.Image;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -76,6 +79,11 @@ public class UserController {
         User fetched = userRepository.findById(user.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         return accountService.getProfileInformation(fetched.getId());
+    }
+
+    @GetMapping("/profile/images")
+    public ResponseEntity<Page<ImageWithUserLikeDTO>> getProfilePhotos(@AuthenticationPrincipal User user, Pageable pageable) {
+        return accountService.profilePhotos(user.getId(), pageable);
     }
 
 }

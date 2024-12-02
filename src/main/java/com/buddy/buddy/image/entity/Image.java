@@ -30,7 +30,7 @@ public class Image {
     @Column(nullable = false, unique = true)
     private Date uploadedDate = new Date();
 
-    @Column()
+    @Column(length = 2048)
     private String description;
 
     @Column(nullable = false)

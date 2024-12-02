@@ -7,6 +7,9 @@ import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.account.service.AccountService;
 import com.buddy.buddy.auth.AuthenticationService;
+import com.buddy.buddy.image.DTO.GetImageDTO;
+import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
+import com.buddy.buddy.image.repository.ImageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +28,17 @@ public class AccountServiceImplementation implements AccountService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(AccountServiceImplementation.class);
 
     @Override
     public ResponseEntity<GetUserInformationDTO> getAccount(UUID userId) {
 
         return userRepository.findById(userId).map(user -> {
-            if (user.isLocked() || user.isDeleted() || !user.isActive()){
+            if (user.isLocked() || user.isDeleted() || !user.isActive()) {
                 logger.debug("Cannot get user - is locked");
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find user");
             }
@@ -51,12 +58,12 @@ public class AccountServiceImplementation implements AccountService {
 
     @Override
     public ResponseEntity<Page<GetUserInformationDTO>> getUserListByCriteria(String criteria, Pageable pageable) {
-        if (criteria.equals("popularity")){
+        if (criteria.equals("popularity")) {
             logger.debug("Getting user list by popularity");
             Page<GetUserInformationDTO> users = userRepository.findAllByPopularity(pageable);
             return ResponseEntity.ok(users);
         }
-        if (criteria.equals("newest")){
+        if (criteria.equals("newest")) {
             logger.debug("Getting user list by newest");
             Page<GetUserInformationDTO> users = userRepository.findAllByCreatedAt(pageable);
             return ResponseEntity.ok(users);
@@ -67,9 +74,20 @@ public class AccountServiceImplementation implements AccountService {
 
     @Override
     public ResponseEntity<ProfileInformationDTO> getProfileInformation(UUID uuid) {
-        try{
+        try {
             return new ResponseEntity<>(userRepository.findProfileInformationById(uuid), HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<Page<ImageWithUserLikeDTO>> profilePhotos(UUID uuid, Pageable pageable) {
+        try {
+            Page<ImageWithUserLikeDTO> images = imageRepository.findImagesByUserIdWithUserAndLikeStatus(uuid, uuid, pageable);
+            return new ResponseEntity<>(images, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
     }
@@ -77,7 +95,7 @@ public class AccountServiceImplementation implements AccountService {
     @Override
     public ResponseEntity<Page<GetUserInformationDTO>> searchUser(String search, Pageable pageable) {
         Page<User> users = userRepository.findByUsernameContainingIgnoreCaseOrderBySubscribersCount(search, pageable);
-        if(users == null || users.isEmpty()){
+        if (users == null || users.isEmpty()) {
             logger.debug("There is no users");
             return ResponseEntity.ok(Page.empty(pageable));
         }

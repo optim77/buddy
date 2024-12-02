@@ -13,6 +13,7 @@ import com.buddy.buddy.tag.repository.TagRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,13 @@ public class ImageServiceImplementation implements ImageService {
     private final SubscriptionRepository subscriptionRepository;
     private static final Logger logger = LoggerFactory.getLogger(ImageServiceImplementation.class.getName());
     private final TagRepository tagRepository;
-    static final String UPLOAD_DIR = "C:\\Dev\\projekty\\Buddy\\buddy\\src\\main\\resources\\";
+    static final String UPLOAD_DIR = "C:\\Dev\\res";
+
+    @Value("${app.file.storage-path}")
+    private String storagePath;
+
+    @Value("${app.file.base-url}")
+    private String baseUrl;
 
     public ImageServiceImplementation(ImageRepository imageRepository, SubscriptionRepository subscriptionRepository, TagRepository tagRepository) {
         this.imageRepository = imageRepository;
@@ -123,13 +130,13 @@ public class ImageServiceImplementation implements ImageService {
             MultipartFile file = uploadImageDTO.getFile();
             validateFile(file);
 
-            Path uploadPath = Paths.get(UPLOAD_DIR);
+            Path uploadPath = Paths.get(storagePath);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
-
+            UUID randomUUID = UUID.randomUUID();
             String fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase();
-            String savedFileName = UUID.randomUUID().toString() + "." + fileExtension;
+            String savedFileName = randomUUID.toString() + "." + fileExtension;
             Path filePath = uploadPath.resolve(savedFileName);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
@@ -139,6 +146,7 @@ public class ImageServiceImplementation implements ImageService {
             image.setUser(user);
             image.setUrl(filePath.toString());
             image.setOpen(uploadImageDTO.isOpen());
+            image.setId(randomUUID);
 
             Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
                 Optional<Tag> existingTag = tagRepository.findById(tag);
@@ -152,8 +160,8 @@ public class ImageServiceImplementation implements ImageService {
             }).collect(Collectors.toSet());
             image.setTags(tags);
 
-            UUID imageId = imageRepository.save(image).getId();
-            return new ResponseEntity<>(imageId, HttpStatus.CREATED);
+            imageRepository.save(image);
+            return new ResponseEntity<>(randomUUID, HttpStatus.CREATED);
 
         } catch (IOException e) {
             logger.error("File upload failed: " + e.getMessage());

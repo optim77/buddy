@@ -4,6 +4,8 @@ import com.buddy.buddy.account.DTO.GetUserInformationDTO;
 import com.buddy.buddy.account.DTO.ProfileInformationDTO;
 import com.buddy.buddy.account.DTO.UpdateUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
+import com.buddy.buddy.image.DTO.GetImageDTO;
+import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,4 +22,5 @@ public interface AccountService {
     ResponseEntity<Page<GetUserInformationDTO>> getUserListRandom(Pageable pageable);
     ResponseEntity<Page<GetUserInformationDTO>> getUserListByCriteria(String criteria, Pageable pageable);
     ResponseEntity<ProfileInformationDTO> getProfileInformation(UUID uuid);
+    ResponseEntity<Page<ImageWithUserLikeDTO>> profilePhotos(UUID uuid, Pageable pageable);
 }

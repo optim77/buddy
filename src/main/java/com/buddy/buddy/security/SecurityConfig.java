@@ -4,6 +4,7 @@ import com.buddy.buddy.auth.JwtRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -38,6 +39,19 @@ public class SecurityConfig {
     }
 
     @Bean
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowCredentials(true);
+        configuration.addAllowedOrigin("http://localhost:3000"); // Dodaj adres frontendu
+        configuration.addAllowedHeader("*"); // Pozwól na wszystkie nagłówki
+        configuration.addAllowedMethod("*"); // Pozwól na wszystkie metody HTTP (GET, POST, PUT, DELETE itp.)
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // Wyłącza ochronę przed CSRF
@@ -45,15 +59,17 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeRequests(auth -> auth
-                        .requestMatchers("/public/**", "/register", "/authenticate", "/image/**","/image/user/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/public/**", "/register", "/authenticate", "/image/**","/image/user/**", "/images/**").permitAll() // /images/** is permitted because is checking in controller
                         .requestMatchers("/image/upload").authenticated()
                         .requestMatchers("/image/update/{image_id}").authenticated()
                         .requestMatchers("/image/delete/{image_id}").authenticated()
+                        //.requestMatchers("/images/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin().disable()
                 .httpBasic().disable()
-                .cors().disable()
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         // Dodaj filtr JWT przed UsernamePasswordAuthenticationFilter
