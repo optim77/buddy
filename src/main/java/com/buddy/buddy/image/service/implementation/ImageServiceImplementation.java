@@ -5,6 +5,7 @@ import com.buddy.buddy.image.DTO.ImageWithUserLikeAndTagsDTO;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.DTO.UploadImageDTO;
 import com.buddy.buddy.image.entity.Image;
+import com.buddy.buddy.image.entity.MediaType;
 import com.buddy.buddy.image.repository.ImageRepository;
 import com.buddy.buddy.image.service.ImageService;
 import com.buddy.buddy.subscription.repository.SubscriptionRepository;
@@ -146,6 +147,7 @@ public class ImageServiceImplementation implements ImageService {
             image.setUser(user);
             image.setUrl(filePath.toString());
             image.setOpen(uploadImageDTO.isOpen());
+            image.setMediaType(detectMediaType(fileExtension));
             image.setId(randomUUID);
 
             Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
@@ -170,6 +172,13 @@ public class ImageServiceImplementation implements ImageService {
             logger.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
+    }
+
+    private MediaType detectMediaType(String fileExtension) {
+        if (fileExtension.equals("jpg") || fileExtension.equals("jpeg") || fileExtension.equals("png")) {
+            return MediaType.IMAGE;
+        }
+        return MediaType.VIDEO;
     }
 
     private void validateFile(MultipartFile file) {

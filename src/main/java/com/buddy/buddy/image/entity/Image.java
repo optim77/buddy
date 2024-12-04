@@ -45,6 +45,9 @@ public class Image {
     @Column
     private boolean deleted = false;
 
+    @Enumerated(EnumType.STRING)
+    private MediaType mediaType;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

@@ -4,7 +4,6 @@ import com.buddy.buddy.account.DTO.GetUserInformationDTO;
 import com.buddy.buddy.account.DTO.ProfileInformationDTO;
 import com.buddy.buddy.account.DTO.UpdateUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
-import com.buddy.buddy.image.DTO.GetImageDTO;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -6,8 +6,7 @@ import com.buddy.buddy.account.DTO.UpdateUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.account.service.AccountService;
-import com.buddy.buddy.auth.AuthenticationService;
-import com.buddy.buddy.image.DTO.GetImageDTO;
+
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.repository.ImageRepository;
 import org.slf4j.Logger;

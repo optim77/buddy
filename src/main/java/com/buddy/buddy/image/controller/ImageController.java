@@ -3,7 +3,6 @@ package com.buddy.buddy.image.controller;
 
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
-import com.buddy.buddy.image.DTO.GetImageDTO;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeAndTagsDTO;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.DTO.UploadImageDTO;

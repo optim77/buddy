@@ -1,5 +1,6 @@
 package com.buddy.buddy.image.DTO;
 
+import com.buddy.buddy.image.entity.MediaType;
 import com.buddy.buddy.tag.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,7 +26,9 @@ public class ImageWithUserLikeDTO   {
     private String username;
     private String avatar;
     private Date userCreatedAt;
+    private MediaType mediaType;
     private boolean likedByCurrentUser = false;
+
 
 
 

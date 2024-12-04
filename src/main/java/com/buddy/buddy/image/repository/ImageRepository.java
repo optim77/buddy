@@ -25,7 +25,7 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
     Optional<User> findUserByPhotoId(@Param("photoId") UUID photoId);
 
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType," +
             "CASE WHEN (l IS NOT NULL) THEN true ELSE false END)" +
             "FROM Image i " +
             "JOIN i.user u " +
@@ -33,21 +33,21 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
             "WHERE i.id = :imageId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false")
     Optional<ImageWithUserLikeDTO> findImageByIdWithUserAndLikeStatus(@Param("imageId") UUID imageId, @Param("userId") UUID userId);
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, false) " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType, false) " +
             "FROM Image i " +
             "JOIN i.user u " +
             "WHERE i.id = :imageId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false")
     Optional<ImageWithUserLikeDTO> findImageByIdWithUserForNotLoggedUser(@Param("imageId") UUID imageId);
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType, " +
             "CASE WHEN (l IS NOT NULL) THEN true ELSE false END) " +
             "FROM Image i " +
             "JOIN i.user u " +
             "LEFT JOIN Like l ON l.image.id = i.id AND l.user.id = :userId " +
-            "WHERE i.user.id = :authorId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false")
+            "WHERE i.user.id = :authorId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false ORDER BY i.uploadedDate DESC")
     Page<ImageWithUserLikeDTO> findImagesByUserIdWithUserAndLikeStatus(@Param("authorId") UUID authorId, @Param("userId") UUID userId, Pageable pageable);
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, false) " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType, false) " +
             "FROM Image i " +
             "JOIN i.user u " +
             "WHERE i.user.id = :authorId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false")
@@ -57,14 +57,14 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
     @Query("UPDATE Image i SET i.deleted = true WHERE i.id = :imageId")
     void setDeleteImageById(@Param("imageId") UUID imageId);
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, i.user.id, i.user.username, i.user.avatar, i.user.createdAt, false) " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, i.user.id, i.user.username, i.user.avatar, i.user.createdAt, i.mediaType, false) " +
             "FROM Image i " +
             "JOIN i.tags t  " +
             "WHERE i.user.locked = false AND i.user.deleted = false AND i.user.active = true AND i.deleted = false AND t.name = :tag AND i.open = true ORDER BY RANDOM()")
     Page<ImageWithUserLikeDTO> findOpenImagesByTagNotLoggedUser(@Param("tag") String tag, Pageable pageable);
 
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType," +
             "CASE WHEN (l IS NOT NULL) THEN true ELSE false END) " +
             "FROM Image i " +
             "JOIN i.user u " +
@@ -74,7 +74,7 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
     Page<ImageWithUserLikeDTO> findOpenImagesByTagLoggedUser(@Param("tag") String tag, @Param("user_id") UUID user_id, Pageable pageable);
 
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType," +
             "CASE WHEN (l IS NOT NULL) THEN true ELSE false END) " +
             "FROM Image i " +
             "JOIN i.user u " +
@@ -82,7 +82,7 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
             "WHERE i.user.id = :user_id AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
     Page<ImageWithUserLikeDTO> findOpenImagesByRandomLoggedUser(@Param("user_id") UUID user_id, Pageable pageable);
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, i.user.id, i.user.username, i.user.avatar, i.user.createdAt, false) " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, i.user.id, i.user.username, i.user.avatar, i.user.createdAt, i.mediaType, false) " +
             "FROM Image i " +
             "WHERE i.user.locked = false AND i.user.deleted = false AND i.user.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
     Page<ImageWithUserLikeDTO> findOpenImagesByRandomNotLoggedUser(Pageable pageable);

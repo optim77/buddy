@@ -1,5 +1,6 @@
 package com.buddy.buddy.image.DTO;
 
+import com.buddy.buddy.image.entity.MediaType;
 import com.buddy.buddy.tag.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class ImageWithUserLikeAndTagsDTO {
     private Date userCreatedAt;
     private Set<String> tags;
     private boolean likedByCurrentUser = false;
+    private MediaType mediaType;
 
     public ImageWithUserLikeAndTagsDTO(ImageWithUserLikeDTO imageWithUserLikeDTO, Set<String> tags) {
         this.imageId = imageWithUserLikeDTO.getImageId();
@@ -41,6 +43,7 @@ public class ImageWithUserLikeAndTagsDTO {
         this.username = imageWithUserLikeDTO.getUsername();
         this.avatar = imageWithUserLikeDTO.getAvatar();
         this.userCreatedAt = imageWithUserLikeDTO.getUserCreatedAt();
+        this.mediaType = imageWithUserLikeDTO.getMediaType();
         this.tags = tags;
     }
 
