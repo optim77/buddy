@@ -121,8 +121,8 @@ public class ImageServiceImplementation implements ImageService {
     public ResponseEntity<UUID> uploadImage(UploadImageDTO uploadImageDTO, User user) {
 
         try {
-            logger.debug("Creating and saving media");
-            logger.debug("Received DTO: file={}, description={}, tags={}, open={}",
+            logger.info("Creating and saving media");
+            logger.info("Received DTO: file={}, description={}, tags={}, open={}",
                     uploadImageDTO.getFile(),
                     uploadImageDTO.getDescription(),
                     uploadImageDTO.getTagSet(),

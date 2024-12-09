@@ -36,7 +36,7 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
     @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType, false) " +
             "FROM Image i " +
             "JOIN i.user u " +
-            "WHERE i.id = :imageId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false")
+            "WHERE i.id = :imageId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND i.open = true")
     Optional<ImageWithUserLikeDTO> findImageByIdWithUserForNotLoggedUser(@Param("imageId") UUID imageId);
 
     @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType, " +
@@ -50,7 +50,7 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
     @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType, false) " +
             "FROM Image i " +
             "JOIN i.user u " +
-            "WHERE i.user.id = :authorId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false")
+            "WHERE i.user.id = :authorId AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND i.open = true")
     Page<ImageWithUserLikeDTO> findImagesByUserIdForNotLoggedUser(@Param("authorId") UUID authorId, Pageable pageable);
 
     @Modifying

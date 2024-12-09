@@ -27,7 +27,7 @@ public class ImageWithUserLikeDTO   {
     private String avatar;
     private Date userCreatedAt;
     private MediaType mediaType;
-    private boolean likedByCurrentUser = false;
+    private boolean likedByCurrentUser;
 
 
 

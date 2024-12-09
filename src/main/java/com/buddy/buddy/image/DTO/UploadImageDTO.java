@@ -6,9 +6,7 @@ import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -16,5 +14,5 @@ public class UploadImageDTO {
     private String description;
     private boolean open;
     private MultipartFile file;
-    private Set<String> tagSet = new HashSet<>();
+    private List<String> tagSet = new ArrayList<>();
 }

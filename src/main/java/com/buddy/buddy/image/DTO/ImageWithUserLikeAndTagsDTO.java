@@ -29,7 +29,7 @@ public class ImageWithUserLikeAndTagsDTO {
     private String avatar;
     private Date userCreatedAt;
     private Set<String> tags;
-    private boolean likedByCurrentUser = false;
+    private boolean likedByCurrentUser;
     private MediaType mediaType;
 
     public ImageWithUserLikeAndTagsDTO(ImageWithUserLikeDTO imageWithUserLikeDTO, Set<String> tags) {
@@ -44,6 +44,7 @@ public class ImageWithUserLikeAndTagsDTO {
         this.avatar = imageWithUserLikeDTO.getAvatar();
         this.userCreatedAt = imageWithUserLikeDTO.getUserCreatedAt();
         this.mediaType = imageWithUserLikeDTO.getMediaType();
+        this.likedByCurrentUser = imageWithUserLikeDTO.isLikedByCurrentUser();
         this.tags = tags;
     }
 
