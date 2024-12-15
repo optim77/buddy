@@ -128,6 +128,10 @@ public class ImageServiceImplementation implements ImageService {
                     uploadImageDTO.getTagSet(),
                     uploadImageDTO.isOpen());
 
+            if (uploadImageDTO.getTagSet().size() > 20){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TagSet size too large");
+            }
+
             MultipartFile file = uploadImageDTO.getFile();
             validateFile(file);
 
