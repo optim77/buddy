@@ -85,7 +85,7 @@ public class LikeServiceImplementation implements LikeService {
         if (user.isPresent()) {
             return subscriptionRepository.existsBySubscriberAndSubscribedTo(userID, user.get().getId());
         }
-        logger.error("User not found in subscriptions");
+        logger.info("User not found in subscriptions");
         return false;
     }
 }

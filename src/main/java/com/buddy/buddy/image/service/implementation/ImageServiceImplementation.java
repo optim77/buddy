@@ -3,6 +3,7 @@ package com.buddy.buddy.image.service.implementation;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeAndTagsDTO;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
+import com.buddy.buddy.image.DTO.UpdateImageDTO;
 import com.buddy.buddy.image.DTO.UploadImageDTO;
 import com.buddy.buddy.image.entity.Image;
 import com.buddy.buddy.image.entity.MediaType;
@@ -28,10 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -64,10 +62,10 @@ public class ImageServiceImplementation implements ImageService {
                     .map(dto -> {
                         Set<String> tags = imageRepository.findTagsByImageId(imageId);
                         ImageWithUserLikeAndTagsDTO imageWithUserLikeAndTagsDTO = new ImageWithUserLikeAndTagsDTO(dto, tags);
-                        if (dto.isOpen() || isSubscriber(user.getId(), dto.getUserId())) {
+                        if (dto.isOpen() || isSubscriber(user.getId(), dto.getUserId()) || user.getId().equals(dto.getUserId())) {
                             return new ResponseEntity<>(imageWithUserLikeAndTagsDTO, HttpStatus.OK);
                         }
-                        dto.setImageUrl("-");
+                        dto.setImageUrl("");
                         return new ResponseEntity<>(imageWithUserLikeAndTagsDTO, HttpStatus.OK);
                     })
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found"));
@@ -94,8 +92,9 @@ public class ImageServiceImplementation implements ImageService {
             if (user != null) {
                 boolean isSubscriber = isSubscriber(user.getId(), authorId);
                 Page<ImageWithUserLikeDTO> images =  imageRepository.findImagesByUserIdWithUserAndLikeStatus(authorId, user.getId(), pageable).map(image -> {
-                    if (!image.isOpen() || !isSubscriber) {
-                        image.setImageUrl("-");
+                    //check if visitor is author also || user.getId().equals(image.getUserId())
+                    if (!image.isOpen() && !isSubscriber && user.getId().equals(image.getUserId())) {
+                        image.setImageUrl("");
                     }
                     return image;
                 });
@@ -209,7 +208,7 @@ public class ImageServiceImplementation implements ImageService {
     }
 
     @Override
-    public ResponseEntity<HttpStatus> updateImage(UploadImageDTO uploadImageDTO, UUID image_id, User user){
+    public ResponseEntity<HttpStatus> updateImage(UpdateImageDTO uploadImageDTO, UUID image_id, User user){
         // TODO: update tags
         try {
             Image image = imageRepository.findById(image_id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found"));
@@ -219,9 +218,9 @@ public class ImageServiceImplementation implements ImageService {
             if (uploadImageDTO.isOpen() != image.isOpen()) {
                 image.setOpen(uploadImageDTO.isOpen());
             }
-            Set<String> currentTagNames = image.getTags().stream()
+            List<String> currentTagNames = image.getTags().stream()
                     .map(Tag::getName)
-                    .collect(Collectors.toSet());
+                    .toList();
             if (!uploadImageDTO.getTagSet().equals(currentTagNames)){
                 Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
                     Optional<Tag> existed_tag = tagRepository.findById(tag);
@@ -235,8 +234,6 @@ public class ImageServiceImplementation implements ImageService {
                 }).collect(Collectors.toSet());
                 image.setTags(tags);
             }
-
-            MultipartFile file = uploadImageDTO.getFile();
 
             imageRepository.save(image);
             return new ResponseEntity<>(HttpStatus.CREATED);
@@ -306,7 +303,7 @@ public class ImageServiceImplementation implements ImageService {
         if (user.isPresent()) {
             return subscriptionRepository.existsBySubscriberAndSubscribedTo(userID, user.get().getId());
         }
-        logger.error("User not found in subscriptions");
+        logger.info("User not found in subscriptions");
         return false;
     }
 }

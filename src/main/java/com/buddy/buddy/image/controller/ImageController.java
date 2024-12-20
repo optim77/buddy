@@ -5,6 +5,7 @@ import com.buddy.buddy.account.DTO.GetUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeAndTagsDTO;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
+import com.buddy.buddy.image.DTO.UpdateImageDTO;
 import com.buddy.buddy.image.DTO.UploadImageDTO;
 import com.buddy.buddy.image.entity.Image;
 import com.buddy.buddy.image.service.ImageService;
@@ -60,7 +61,7 @@ public class ImageController {
     }
 
     @PutMapping("/image/update/{image_id}")
-    private ResponseEntity<HttpStatus> updateImage(@RequestBody UploadImageDTO uploadImageDTO, @PathVariable UUID image_id, @AuthenticationPrincipal User user) {
+    private ResponseEntity<HttpStatus> updateImage(@RequestBody UpdateImageDTO uploadImageDTO, @PathVariable UUID image_id, @AuthenticationPrincipal User user) {
         return imageService.updateImage(uploadImageDTO, image_id, user);
     }
 
