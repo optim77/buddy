@@ -297,6 +297,24 @@ public class ImageServiceImplementation implements ImageService {
         }
     }
 
+    @Override
+    public ResponseEntity<Page<ImageWithUserLikeDTO>> getLoops(User user, Pageable pageable) {
+        try{
+            if (user != null){
+                logger.debug("Logged user - getLoops");
+                Page<ImageWithUserLikeDTO> videos = imageRepository.findOpenVideosByRandomLoggedUser(user.getId(), pageable);
+                return new ResponseEntity<>(videos, HttpStatus.OK);
+            }else{
+                logger.debug("Not logged user - getLoops");
+                Page<ImageWithUserLikeDTO> video = imageRepository.findOpenVideosByRandomNotLoggedUser(pageable);
+                return new ResponseEntity<>(video, HttpStatus.OK);
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    }
+
 
     public boolean isSubscriber(UUID userID, UUID imageID) {
         Optional<User> user = imageRepository.findUserByPhotoId(imageID);

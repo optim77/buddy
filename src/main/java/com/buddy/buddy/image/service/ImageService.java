@@ -20,4 +20,5 @@ public interface ImageService {
     ResponseEntity<HttpStatus> deleteImage(UUID imageId, User user);
     ResponseEntity<Page<ImageWithUserLikeDTO>> getImagesByTag(String tag, User user, Pageable pageable);
     ResponseEntity<Page<ImageWithUserLikeDTO>> getImagesRandom(User user, Pageable pageable);
+    ResponseEntity<Page<ImageWithUserLikeDTO>> getLoops(User user, Pageable pageable);
 }

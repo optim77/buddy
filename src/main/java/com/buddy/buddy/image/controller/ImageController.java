@@ -69,4 +69,9 @@ public class ImageController {
     private ResponseEntity<HttpStatus> deleteImage(@PathVariable UUID image_id, @AuthenticationPrincipal User user) {
         return imageService.deleteImage(image_id, user);
     }
+
+    @GetMapping("/loops")
+    private ResponseEntity<Page<ImageWithUserLikeDTO>> getLoops(@AuthenticationPrincipal User user, Pageable pageable) {
+        return imageService.getLoops(user, pageable);
+    }
 }

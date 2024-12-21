@@ -87,6 +87,19 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
             "WHERE i.user.locked = false AND i.user.deleted = false AND i.user.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
     Page<ImageWithUserLikeDTO> findOpenImagesByRandomNotLoggedUser(Pageable pageable);
 
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, u.id, u.username, u.avatar, u.createdAt, i.mediaType," +
+            "CASE WHEN (l IS NOT NULL) THEN true ELSE false END) " +
+            "FROM Image i " +
+            "JOIN i.user u " +
+            "LEFT JOIN Like l ON l.image.id = i.id AND l.user.id = :user_id " +
+            "WHERE i.user.id = :user_id AND i.mediaType = 'VIDEO' AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
+    Page<ImageWithUserLikeDTO> findOpenVideosByRandomLoggedUser (@Param("user_id") UUID user_id, Pageable pageable);
+
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, i.user.id, i.user.username, i.user.avatar, i.user.createdAt, i.mediaType, false) " +
+            "FROM Image i " +
+            "WHERE i.user.locked = false AND i.mediaType = 'VIDEO' AND i.user.deleted = false AND i.user.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
+    Page<ImageWithUserLikeDTO> findOpenVideosByRandomNotLoggedUser(Pageable pageable);
+
     @Query("SELECT t.name FROM Image i JOIN i.tags t WHERE i.id = :image_id")
     Set<String> findTagsByImageId(@Param("image_id") UUID image_id);
 
