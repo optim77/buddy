@@ -130,6 +130,9 @@ public class ImageServiceImplementation implements ImageService {
             if (uploadImageDTO.getTagSet().size() > 20){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TagSet size too large");
             }
+            if (uploadImageDTO.getDescription().length() > 2048){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description too long");
+            }
 
             MultipartFile file = uploadImageDTO.getFile();
             validateFile(file);

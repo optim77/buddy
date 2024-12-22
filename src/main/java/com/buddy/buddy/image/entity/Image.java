@@ -36,6 +36,9 @@ public class Image {
     @Column(nullable = false)
     private int likeCount = 0;
 
+    @Column(nullable = false)
+    private int watchCount = 0;
+
     @Column
     private boolean open;
 
