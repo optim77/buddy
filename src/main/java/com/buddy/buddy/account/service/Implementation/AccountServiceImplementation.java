@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -111,30 +112,34 @@ public class AccountServiceImplementation implements AccountService {
     public ResponseEntity<HttpStatus> updateUser(UpdateUserInformationDTO updateUserInformationDTO, User user) {
         logger.debug("Updating user {}", user.getId());
         GetUserInformationDTO getUserDTO = new GetUserInformationDTO(user);
-        try {
-            if (updateUserInformationDTO.getUsername() != null && !updateUserInformationDTO.getUsername().isEmpty()) {
-                boolean isExistUser = userRepository.existsByUsername(updateUserInformationDTO.getUsername());
-                if (isExistUser) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+        Optional<User> fetchedUser = userRepository.findById(user.getId());
+        if (fetchedUser.isPresent()) {
+            try {
+                if (updateUserInformationDTO.getUsername() != null && !updateUserInformationDTO.getUsername().isEmpty() && !updateUserInformationDTO.getUsername().equals(fetchedUser.get().getUsername())) {
+                    boolean isExistUser = userRepository.existsByUsername(updateUserInformationDTO.getUsername());
+                    if (isExistUser) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+                    }
+                    user.setUsername(updateUserInformationDTO.getUsername());
+                    getUserDTO.setUsername(updateUserInformationDTO.getUsername());
                 }
-                user.setUsername(updateUserInformationDTO.getUsername());
-                getUserDTO.setUsername(updateUserInformationDTO.getUsername());
-            }
-            if (updateUserInformationDTO.getPassword() != null && !updateUserInformationDTO.getPassword().isEmpty()) {
-                user.setPassword(updateUserInformationDTO.getPassword());
-            }
-            if (updateUserInformationDTO.getDescription() != null && !updateUserInformationDTO.getDescription().isEmpty()) {
-                user.setDescription(updateUserInformationDTO.getDescription());
-                getUserDTO.setDescription(updateUserInformationDTO.getDescription());
-            }
-            user.setDeleted(updateUserInformationDTO.isDeleted());
-            user.setActive(updateUserInformationDTO.isActive());
+                if (updateUserInformationDTO.getPassword() != null && !updateUserInformationDTO.getPassword().isEmpty()) {
+                    user.setPassword(updateUserInformationDTO.getPassword());
+                }
+                if (updateUserInformationDTO.getDescription() != null && !updateUserInformationDTO.getDescription().isEmpty() && !updateUserInformationDTO.getDescription().equals(fetchedUser.get().getDescription())) {
+                    user.setDescription(updateUserInformationDTO.getDescription());
+                    getUserDTO.setDescription(updateUserInformationDTO.getDescription());
+                }
+                user.setDeleted(updateUserInformationDTO.isDeleted());
+                user.setActive(updateUserInformationDTO.isActive());
 
-            userRepository.save(user);
-            return ResponseEntity.ok().body(HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error("Error while updating user", e);
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error while updating user");
+                userRepository.save(user);
+                return ResponseEntity.ok().body(HttpStatus.OK);
+            } catch (Exception e) {
+                logger.error("Error while updating user", e);
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Error while updating user");
+            }
         }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
     }
 }

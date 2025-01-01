@@ -35,6 +35,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT true FROM User u WHERE u.deleted = false AND u.locked = false AND u.active = true AND u.id = :id")
     boolean userIsActiveById(@Param("id") UUID id);
 
-    @Query("SELECT new com.buddy.buddy.account.DTO.ProfileInformationDTO(u.id, u.email, u.username, u.description, u.age, u.avatar, u.active, u.locked) FROM User u WHERE u.id = :user_id")
+    @Query("SELECT new com.buddy.buddy.account.DTO.ProfileInformationDTO(u.id, u.email, u.username, u.description, u.age, u.avatar, u.active, u.locked, u.posts) FROM User u WHERE u.id = :user_id")
     ProfileInformationDTO findProfileInformationById(@Param("user_id") UUID user_id);
 }

@@ -1,6 +1,7 @@
 package com.buddy.buddy.image.service.implementation;
 
 import com.buddy.buddy.account.entity.User;
+import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeAndTagsDTO;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.DTO.UpdateImageDTO;
@@ -41,6 +42,7 @@ public class ImageServiceImplementation implements ImageService {
     private static final Logger logger = LoggerFactory.getLogger(ImageServiceImplementation.class.getName());
     private final TagRepository tagRepository;
     static final String UPLOAD_DIR = "C:\\Dev\\res";
+    private final UserRepository userRepository;
 
     @Value("${app.file.storage-path}")
     private String storagePath;
@@ -48,10 +50,11 @@ public class ImageServiceImplementation implements ImageService {
     @Value("${app.file.base-url}")
     private String baseUrl;
 
-    public ImageServiceImplementation(ImageRepository imageRepository, SubscriptionRepository subscriptionRepository, TagRepository tagRepository) {
+    public ImageServiceImplementation(ImageRepository imageRepository, SubscriptionRepository subscriptionRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.imageRepository = imageRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.tagRepository = tagRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -156,6 +159,9 @@ public class ImageServiceImplementation implements ImageService {
             image.setMediaType(detectMediaType(fileExtension));
             image.setId(randomUUID);
 
+            user.setPosts(user.getPosts() + 1);
+            userRepository.save(user);
+
             Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
                 Optional<Tag> existingTag = tagRepository.findById(tag);
                 if (existingTag.isPresent()) {
@@ -254,6 +260,10 @@ public class ImageServiceImplementation implements ImageService {
             logger.debug("Deleting image by logged user, image {}", imageId);
             try{
                 imageRepository.setDeleteImageById(imageId);
+
+                user.setPosts(user.getPosts() - 1);
+                userRepository.save(user);
+
                 return new ResponseEntity<>(HttpStatus.OK);
             }catch (Exception e) {
                 logger.error(e.getMessage());

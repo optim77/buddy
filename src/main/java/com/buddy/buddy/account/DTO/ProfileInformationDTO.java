@@ -19,4 +19,5 @@ public class ProfileInformationDTO {
     private String avatar;
     private boolean active;
     private boolean locked;
+    private int posts;
 }

@@ -76,6 +76,9 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = false)
     private Date createdAt;
 
+    @Column
+    private int posts;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Like> likes;
 
