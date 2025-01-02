@@ -1,6 +1,7 @@
 package com.buddy.buddy.account.service;
 
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
+import com.buddy.buddy.account.DTO.GetUserProfileInformationDTO;
 import com.buddy.buddy.account.DTO.ProfileInformationDTO;
 import com.buddy.buddy.account.DTO.UpdateUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 @Service
 public interface AccountService {
-    ResponseEntity<GetUserInformationDTO> getAccount(UUID uuid);
+    ResponseEntity<GetUserProfileInformationDTO> getAccount(UUID uuid, User user);
     ResponseEntity<Page<GetUserInformationDTO>> searchUser(String username, Pageable pageable);
     ResponseEntity<HttpStatus> updateUser(UpdateUserInformationDTO updateUserInformationDTO, User user);
     ResponseEntity<Page<GetUserInformationDTO>> getUserListRandom(Pageable pageable);

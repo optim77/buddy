@@ -25,9 +25,9 @@ public class FollowController {
         this.followService = followService;
     }
 
-    @PostMapping("/follow")
-    public ResponseEntity<HttpStatus> getFollowOrUnfollow(@AuthenticationPrincipal User user, @RequestBody UUID followedTo){
-        return followService.followOrUnfollow(user, followedTo);
+    @PostMapping("/follow/{user_id}")
+    public ResponseEntity<HttpStatus> getFollowOrUnfollow(@AuthenticationPrincipal User user, @PathVariable UUID user_id) {
+        return followService.followOrUnfollow(user, user_id);
     }
 
     @GetMapping("/follows")

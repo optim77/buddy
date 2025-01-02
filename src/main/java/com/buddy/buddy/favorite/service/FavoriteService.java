@@ -1,7 +1,6 @@
 package com.buddy.buddy.favorite.service;
 
 import com.buddy.buddy.account.entity.User;
-import com.buddy.buddy.favorite.entity.Favorite;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

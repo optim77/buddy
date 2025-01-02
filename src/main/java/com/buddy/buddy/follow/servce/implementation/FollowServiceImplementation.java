@@ -35,28 +35,46 @@ public class FollowServiceImplementation implements FollowService {
 
     @Override
     public ResponseEntity<HttpStatus> followOrUnfollow(User user, UUID followedTo) {
-        try {
-            Optional<Follow> isFollowed = followRepository.findByUserAndFollowedTo(user.getId(), followedTo);
-            if (isFollowed.isPresent()) {
-                followRepository.deleteByUserAndFollowedTo(user.getId(), followedTo);
-            }else {
-                Follow follow = new Follow();
-                Optional<User> followedToUser = userRepository.findById(followedTo);
-                if (followedToUser.isPresent()) {
-                    follow.setFollowedTo(followedToUser.get());
-                }else {
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-                }
-                follow.setFollower(user);
-                follow.setCreated(LocalDate.now());
-                followRepository.save(follow);
-            }
-            return new ResponseEntity<>(HttpStatus.OK);
 
-        }catch (Exception e) {
-            logger.error(e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
+        if (userRepository.findById(user.getId()).isPresent()){
+            try {
+                Optional<Follow> isFollowed = followRepository.findByUserAndFollowedTo(user.getId(), followedTo);
+                if (isFollowed.isPresent()) {
+                    followRepository.deleteByUserAndFollowedTo(user.getId(), followedTo);
+
+                    user.setFollowing(user.getFollowing() - 1);
+                    userRepository.save(user);
+
+                    userRepository.findById(followedTo).ifPresent(followed -> {
+                        followed.setFollowers(followed.getFollowers() - 1);
+                        userRepository.save(followed);
+                    });
+
+                }else {
+                    Follow follow = new Follow();
+                    Optional<User> followedToUser = userRepository.findById(followedTo);
+                    if (followedToUser.isPresent()) {
+                        follow.setFollowedTo(followedToUser.get());
+                        user.setFollowing(user.getFollowing() + 1);
+                        userRepository.save(user);
+                        followedToUser.get().setFollowers(followedToUser.get().getFollowers() + 1);
+                        userRepository.save(followedToUser.get());
+                    }else {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+                    }
+                    follow.setFollower(user);
+                    follow.setCreated(LocalDate.now());
+                    followRepository.save(follow);
+                }
+                return new ResponseEntity<>(HttpStatus.OK);
+
+            }catch (Exception e) {
+                logger.error(e.getMessage());
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
+            }
         }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.buddy.buddy.account.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;
@@ -9,10 +10,10 @@ import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ProfileInformationDTO {
+@NoArgsConstructor
+public class GetUserProfileInformationDTO {
 
     private UUID uuid;
-    private String email;
     private String username;
     private String description;
     private int age;
@@ -23,6 +24,7 @@ public class ProfileInformationDTO {
     private int followers;
     private int following;
     private int subscribers;
-    private int subscribed;
+    private boolean isFollowing;
+    private boolean isSubscribed;
 
 }

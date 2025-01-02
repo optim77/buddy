@@ -1,6 +1,7 @@
 package com.buddy.buddy.account.controller;
 
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
+import com.buddy.buddy.account.DTO.GetUserProfileInformationDTO;
 import com.buddy.buddy.account.DTO.ProfileInformationDTO;
 import com.buddy.buddy.account.DTO.UpdateUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
@@ -39,8 +40,8 @@ public class UserController {
     }
 
     @GetMapping("/user/{userId}")
-    private ResponseEntity<GetUserInformationDTO> getUserInformation(@PathVariable UUID userId) {
-        return accountService.getAccount(userId);
+    private ResponseEntity<GetUserProfileInformationDTO> getUserInformation(@PathVariable UUID userId, @AuthenticationPrincipal User user) {
+        return accountService.getAccount(userId, user);
     }
 
     @GetMapping("/user/list")

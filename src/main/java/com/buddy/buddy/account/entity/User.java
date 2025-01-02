@@ -79,6 +79,12 @@ public class User implements UserDetails {
     @Column
     private int posts;
 
+    @Column
+    private int followers;
+
+    @Column
+    private int following;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Like> likes;
 

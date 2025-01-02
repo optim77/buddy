@@ -1,6 +1,7 @@
 package com.buddy.buddy.account.repository;
 
 import com.buddy.buddy.account.DTO.GetUserInformationDTO;
+import com.buddy.buddy.account.DTO.GetUserProfileInformationDTO;
 import com.buddy.buddy.account.DTO.ProfileInformationDTO;
 import com.buddy.buddy.account.entity.User;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,15 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT true FROM User u WHERE u.deleted = false AND u.locked = false AND u.active = true AND u.id = :id")
     boolean userIsActiveById(@Param("id") UUID id);
 
-    @Query("SELECT new com.buddy.buddy.account.DTO.ProfileInformationDTO(u.id, u.email, u.username, u.description, u.age, u.avatar, u.active, u.locked, u.posts) FROM User u WHERE u.id = :user_id")
+    @Query("SELECT new com.buddy.buddy.account.DTO.ProfileInformationDTO(u.id, u.email, u.username, u.description, u.age, u.avatar, u.active, u.locked, u.posts, u.followers, u.following, u.subscribersCount, u.subscriptionsCount) FROM User u WHERE u.id = :user_id")
     ProfileInformationDTO findProfileInformationById(@Param("user_id") UUID user_id);
+
+    @Query("SELECT new com.buddy.buddy.account.DTO.GetUserProfileInformationDTO(u.id, u.username, u.description, u.age, u.avatar, u.active, u.locked, u.posts, u.followers, u.following, u.subscribersCount, false, false ) FROM User u WHERE u.id = :user_id AND (u.locked = false OR u.deleted = false OR u.active = true ) ")
+    GetUserProfileInformationDTO findGetUserProfileInformationById(@Param("user_id") UUID user_id);
+
+    @Query("SELECT new com.buddy.buddy.account.DTO.GetUserProfileInformationDTO(u.id, u.username, u.description, u.age, u.avatar, u.active, u.locked, u.posts, u.followers, u.following, u.subscribersCount, " +
+            "(CASE WHEN EXISTS (SELECT 1 FROM Follow f WHERE f.follower.id = :logged_user AND f.followedTo.id = :user_id) THEN true ELSE false END), " +
+            "(CASE WHEN EXISTS (SELECT 1 FROM Subscription s WHERE s.subscriber.id = :logged_user AND s.subscribedTo.id = :user_id) THEN true ELSE false END ) ) " +
+            "FROM User u WHERE u.id = :user_id AND (u.locked = false OR u.deleted = false OR u.active = true ) ")
+    GetUserProfileInformationDTO findGetUserProfileInformationByIdForLogged(@Param("user_id") UUID user_id, @Param("logged_user") UUID logged_user);
 }
