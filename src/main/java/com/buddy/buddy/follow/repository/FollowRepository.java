@@ -17,15 +17,15 @@ import java.util.UUID;
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, UUID> {
 
-    @Query("SELECT f FROM Follow f WHERE f.follower =: user_id AND f.followedTo =: followed_to")
-    Optional<Follow> findByUserAndFollowedTo(@Param("user_id") UUID user_id, @Param("followed_to") UUID followedTo);
+    @Query("SELECT f FROM Follow f WHERE f.follower.id = :user_id AND f.followedTo.id = :followed_to")
+    Optional<Follow> findByUserAndFollowedTo(@Param("user_id") UUID user_id, @Param("followed_to") UUID followed_to);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM Follow f WHERE f.follower =:user_id AND f.followedTo =:followedTo")
-    void deleteByUserAndFollowedTo(@Param("user_id") UUID user_id, UUID followedTo);
+    @Query("DELETE FROM Follow f WHERE f.follower.id = :user_id AND f.followedTo.id = :followed_to")
+    void deleteByUserAndFollowedTo(@Param("user_id") UUID user_id, @Param("followed_to") UUID followed_to);
 
     @Query("SELECT new com.buddy.buddy.account.DTO.GetUserInformationDTO(u) FROM Subscription s JOIN s.subscribedTo u " +
-            "WHERE s.subscriber =: user_id AND u.deleted = false AND u.locked = false AND u.active = true ")
+            "WHERE s.subscriber.id = :user_id AND u.deleted = false AND u.locked = false AND u.active = true ")
     Page<GetUserInformationDTO> findFollowedByUser(@Param("user_id") UUID user_id, Pageable pageable);
 }

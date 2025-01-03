@@ -42,8 +42,8 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.addAllowedOrigin("http://localhost:3000"); // Dodaj adres frontendu
-        configuration.addAllowedHeader("*"); // Pozwól na wszystkie nagłówki
+        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*"); // Pozwól na wszystkie metody HTTP (GET, POST, PUT, DELETE itp.)
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -60,10 +60,11 @@ public class SecurityConfig {
                 )
                 .authorizeRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/public/**", "/register", "/authenticate", "/image/**","/image/user/**", "/images/**", "/loops").permitAll() // /images/** is permitted because is checking in controller
+                        .requestMatchers("/public/**", "/register", "/authenticate", "/image/**","/image/user/**", "/images/**", "/loops", "/user/**").permitAll() // /images/** is permitted because is checking in controller
                         .requestMatchers("/image/upload").authenticated()
                         .requestMatchers("/image/update/{image_id}").authenticated()
                         .requestMatchers("/image/delete/{image_id}").authenticated()
+                        .requestMatchers("/follow/**").authenticated()
                         //.requestMatchers("/images/**").authenticated()
                         .anyRequest().authenticated()
                 )

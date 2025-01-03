@@ -44,7 +44,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT new com.buddy.buddy.account.DTO.GetUserProfileInformationDTO(u.id, u.username, u.description, u.age, u.avatar, u.active, u.locked, u.posts, u.followers, u.following, u.subscribersCount, " +
             "(CASE WHEN EXISTS (SELECT 1 FROM Follow f WHERE f.follower.id = :logged_user AND f.followedTo.id = :user_id) THEN true ELSE false END), " +
-            "(CASE WHEN EXISTS (SELECT 1 FROM Subscription s WHERE s.subscriber.id = :logged_user AND s.subscribedTo.id = :user_id) THEN true ELSE false END ) ) " +
+            "(CASE WHEN EXISTS (SELECT 1 FROM Subscription s WHERE s.subscriber.id = :logged_user AND s.subscribedTo.id = :user_id) THEN true ELSE false END )) " +
             "FROM User u WHERE u.id = :user_id AND (u.locked = false OR u.deleted = false OR u.active = true ) ")
     GetUserProfileInformationDTO findGetUserProfileInformationByIdForLogged(@Param("user_id") UUID user_id, @Param("logged_user") UUID logged_user);
 }

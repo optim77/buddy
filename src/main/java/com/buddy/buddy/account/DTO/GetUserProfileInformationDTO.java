@@ -10,7 +10,6 @@ import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 public class GetUserProfileInformationDTO {
 
     private UUID uuid;
@@ -24,7 +23,7 @@ public class GetUserProfileInformationDTO {
     private int followers;
     private int following;
     private int subscribers;
-    private boolean isFollowing;
+    private boolean isFollowed;
     private boolean isSubscribed;
 
 }

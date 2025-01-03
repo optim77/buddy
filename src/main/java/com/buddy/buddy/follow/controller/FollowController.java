@@ -26,7 +26,7 @@ public class FollowController {
     }
 
     @PostMapping("/follow/{user_id}")
-    public ResponseEntity<HttpStatus> getFollowOrUnfollow(@AuthenticationPrincipal User user, @PathVariable UUID user_id) {
+    public ResponseEntity<HttpStatus> getFollowOrUnfollow(@PathVariable UUID user_id, @AuthenticationPrincipal User user) {
         return followService.followOrUnfollow(user, user_id);
     }
 
