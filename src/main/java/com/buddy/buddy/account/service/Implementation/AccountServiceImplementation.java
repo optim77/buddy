@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,7 +32,13 @@ public class AccountServiceImplementation implements AccountService {
     @Autowired
     private ImageRepository imageRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     private static final Logger logger = LoggerFactory.getLogger(AccountServiceImplementation.class);
+
+    public AccountServiceImplementation(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public ResponseEntity<GetUserProfileInformationDTO> getAccount(UUID userId, User user) {
@@ -125,6 +132,10 @@ public class AccountServiceImplementation implements AccountService {
         Optional<User> fetchedUser = userRepository.findById(user.getId());
         if (fetchedUser.isPresent()) {
             try {
+                logger.info(updateUserInformationDTO.getUsername());
+                logger.info(updateUserInformationDTO.getDescription());
+                logger.info(updateUserInformationDTO.getAvatar());
+                logger.info(updateUserInformationDTO.getPassword());
                 if (updateUserInformationDTO.getUsername() != null && !updateUserInformationDTO.getUsername().isEmpty() && !updateUserInformationDTO.getUsername().equals(fetchedUser.get().getUsername())) {
                     boolean isExistUser = userRepository.existsByUsername(updateUserInformationDTO.getUsername());
                     if (isExistUser) {
@@ -141,7 +152,6 @@ public class AccountServiceImplementation implements AccountService {
                     getUserDTO.setDescription(updateUserInformationDTO.getDescription());
                 }
                 user.setDeleted(updateUserInformationDTO.isDeleted());
-                user.setActive(updateUserInformationDTO.isActive());
 
                 userRepository.save(user);
                 return ResponseEntity.ok().body(HttpStatus.OK);
@@ -151,5 +161,41 @@ public class AccountServiceImplementation implements AccountService {
             }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+    }
+
+    @Override
+    public ResponseEntity<HttpStatus> updatePassword(String password, User user) {
+        userRepository.findById(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        try {
+            if (isValidPassword(password)) {
+                user.setPassword(passwordEncoder.encode(password));
+                userRepository.save(user);
+            }
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Password does not meet the requirements (8-32 characters, upper and lower case, special character)");
+
+        }catch (Exception e){
+            logger.error("Error while updating password", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error while updating password");
+        }
+    }
+
+    @Override
+    public ResponseEntity<HttpStatus> deleteUser(User user) {
+        userRepository.findById(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        try {
+            user.setDeleted(true);
+            userRepository.save(user);
+            return ResponseEntity.ok().body(HttpStatus.OK);
+        }catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
+        }
+    }
+
+    public boolean isValidPassword(String password) {
+        String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,32}$";
+        return password == null || !password.matches(passwordRegex);
     }
 }

@@ -35,13 +35,10 @@ public class FollowServiceImplementation implements FollowService {
 
     @Override
     public ResponseEntity<HttpStatus> followOrUnfollow(User user, UUID followedTo) {
-        System.out.println("123");
         if (userRepository.findById(user.getId()).isPresent()){
             try {
-                System.out.println("1234");
                 Optional<Follow> isFollowed = followRepository.findByUserAndFollowedTo(user.getId(), followedTo);
                 if (isFollowed.isPresent()) {
-                    System.out.println("12345");
                     followRepository.deleteByUserAndFollowedTo(user.getId(), followedTo);
                     user.setFollowing(user.getFollowing() - 1);
                     userRepository.save(user);

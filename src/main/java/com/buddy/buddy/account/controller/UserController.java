@@ -61,11 +61,21 @@ public class UserController {
         return accountService.searchUser(username, pageable);
     }
 
-    @PutMapping(value = "/user/update")
-    public ResponseEntity<HttpStatus> updateUser(@ModelAttribute UpdateUserInformationDTO userDTO, @AuthenticationPrincipal User principal) {
+    @PutMapping("/user/update")
+    public ResponseEntity<HttpStatus> updateUser(@RequestBody UpdateUserInformationDTO userDTO, @AuthenticationPrincipal User principal) {
         User user = userRepository.findById(principal.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         return accountService.updateUser(userDTO, user);
+    }
+
+    @PostMapping("/user/change_password")
+    public ResponseEntity<HttpStatus> changePassword(@RequestBody String password, @AuthenticationPrincipal User principal) {
+
+        return accountService.updatePassword(password, principal);
+    }
+    @PostMapping("/user/delete")
+    public ResponseEntity<HttpStatus> deleteUser(@AuthenticationPrincipal User principal) {
+        return accountService.deleteUser(principal);
     }
 
     @GetMapping("/profile")

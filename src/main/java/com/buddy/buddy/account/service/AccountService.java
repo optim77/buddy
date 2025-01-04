@@ -19,6 +19,8 @@ public interface AccountService {
     ResponseEntity<GetUserProfileInformationDTO> getAccount(UUID uuid, User user);
     ResponseEntity<Page<GetUserInformationDTO>> searchUser(String username, Pageable pageable);
     ResponseEntity<HttpStatus> updateUser(UpdateUserInformationDTO updateUserInformationDTO, User user);
+    ResponseEntity<HttpStatus> updatePassword(String password, User user);
+    ResponseEntity<HttpStatus> deleteUser(User user);
     ResponseEntity<Page<GetUserInformationDTO>> getUserListRandom(Pageable pageable);
     ResponseEntity<Page<GetUserInformationDTO>> getUserListByCriteria(String criteria, Pageable pageable);
     ResponseEntity<ProfileInformationDTO> getProfileInformation(UUID uuid);
