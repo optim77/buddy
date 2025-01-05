@@ -68,11 +68,16 @@ public class UserController {
         return accountService.updateUser(userDTO, user);
     }
 
-    @PostMapping("/user/change_password")
+    @PutMapping("/user/change_password")
     public ResponseEntity<HttpStatus> changePassword(@RequestBody String password, @AuthenticationPrincipal User principal) {
-
         return accountService.updatePassword(password, principal);
     }
+
+    @PostMapping("/user/lock")
+    public ResponseEntity<HttpStatus> lockAccount(@AuthenticationPrincipal User principal) {
+        return accountService.lockAccount(principal);
+    }
+
     @PostMapping("/user/delete")
     public ResponseEntity<HttpStatus> deleteUser(@AuthenticationPrincipal User principal) {
         return accountService.deleteUser(principal);

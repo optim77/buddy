@@ -171,9 +171,24 @@ public class AccountServiceImplementation implements AccountService {
             if (isValidPassword(password)) {
                 user.setPassword(passwordEncoder.encode(password));
                 userRepository.save(user);
+                return ResponseEntity.ok(HttpStatus.OK);
             }
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Password does not meet the requirements (8-32 characters, upper and lower case, special character)");
 
+        }catch (Exception e){
+            logger.error("Error while updating password", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error while updating password");
+        }
+    }
+
+    @Override
+    public ResponseEntity<HttpStatus> lockAccount(User user) {
+        userRepository.findById(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        try {
+            user.setLocked(!user.isLocked());
+            userRepository.save(user);
+            return ResponseEntity.ok(HttpStatus.OK);
         }catch (Exception e){
             logger.error("Error while updating password", e);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Error while updating password");
