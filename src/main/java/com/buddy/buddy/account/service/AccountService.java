@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ public interface AccountService {
     ResponseEntity<Page<GetUserInformationDTO>> searchUser(String username, Pageable pageable);
     ResponseEntity<HttpStatus> updateUser(UpdateUserInformationDTO updateUserInformationDTO, User user);
     ResponseEntity<HttpStatus> updatePassword(String password, User user);
+    ResponseEntity<HttpStatus> changeAvatar(MultipartFile file, User user);
     ResponseEntity<HttpStatus> lockAccount(User user);
     ResponseEntity<HttpStatus> deleteUser(User user);
     ResponseEntity<Page<GetUserInformationDTO>> getUserListRandom(Pageable pageable);

@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
@@ -71,6 +72,11 @@ public class UserController {
     @PutMapping("/user/change_password")
     public ResponseEntity<HttpStatus> changePassword(@RequestBody String password, @AuthenticationPrincipal User principal) {
         return accountService.updatePassword(password, principal);
+    }
+
+    @PutMapping("/user/change_avatar")
+    public ResponseEntity<HttpStatus> changeAvatar(@RequestBody MultipartFile file, @AuthenticationPrincipal User principal) {
+        return accountService.changeAvatar(file, principal);
     }
 
     @PostMapping("/user/lock")

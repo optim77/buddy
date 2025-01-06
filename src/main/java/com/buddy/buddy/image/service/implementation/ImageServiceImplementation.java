@@ -193,7 +193,7 @@ public class ImageServiceImplementation implements ImageService {
         return MediaType.VIDEO;
     }
 
-    private void validateFile(MultipartFile file) {
+    public static void validateFile(MultipartFile file) {
         final Set<String> allowedExtensions = Set.of("jpg", "jpeg", "png", "gif", "mp4", "mov");
         final long maxFileSize = 100 * 1024 * 1024; // 100 MB
 

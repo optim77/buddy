@@ -9,17 +9,24 @@ import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.account.service.AccountService;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.repository.ImageRepository;
+import com.buddy.buddy.image.service.implementation.ImageServiceImplementation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,6 +38,9 @@ public class AccountServiceImplementation implements AccountService {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Value("${app.file.storage-path}")
+    private String storagePath;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -178,6 +188,31 @@ public class AccountServiceImplementation implements AccountService {
         }catch (Exception e){
             logger.error("Error while updating password", e);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Error while updating password");
+        }
+    }
+
+    @Override
+    public ResponseEntity<HttpStatus> changeAvatar(MultipartFile file, User user) {
+        try {
+            ImageServiceImplementation.validateFile(file);
+
+            Path uploadPath = Paths.get(storagePath);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            UUID randomUUID = UUID.randomUUID();
+            String fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase();
+            String savedFileName = randomUUID.toString() + "." + fileExtension;
+            Path filePath = uploadPath.resolve(savedFileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            user.setAvatar(savedFileName);
+            userRepository.save(user);
+            return ResponseEntity.ok(HttpStatus.OK);
+
+        }catch (Exception e){
+            logger.error("Error while changing avatar", e);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Error while changing avatar");
         }
     }
 
