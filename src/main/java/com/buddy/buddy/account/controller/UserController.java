@@ -75,7 +75,7 @@ public class UserController {
     }
 
     @PutMapping("/user/change_avatar")
-    public ResponseEntity<HttpStatus> changeAvatar(@RequestBody MultipartFile file, @AuthenticationPrincipal User principal) {
+    public ResponseEntity<HttpStatus> changeAvatar(@ModelAttribute MultipartFile file, @AuthenticationPrincipal User principal) {
         return accountService.changeAvatar(file, principal);
     }
 
