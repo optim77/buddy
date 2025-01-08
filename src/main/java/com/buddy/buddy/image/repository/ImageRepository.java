@@ -79,7 +79,7 @@ public interface ImageRepository extends JpaRepository<Image, UUID> {
             "FROM Image i " +
             "JOIN i.user u " +
             "LEFT JOIN Like l ON l.image.id = i.id AND l.user.id = :user_id " +
-            "WHERE i.user.id = :user_id AND u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
+            "WHERE u.locked = false AND u.deleted = false AND u.active = true AND i.deleted = false AND i.open = true ORDER BY RANDOM()")
     Page<ImageWithUserLikeDTO> findOpenImagesByRandomLoggedUser(@Param("user_id") UUID user_id, Pageable pageable);
 
     @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, i.user.id, i.user.username, i.user.avatar, i.user.createdAt, i.mediaType, false) " +

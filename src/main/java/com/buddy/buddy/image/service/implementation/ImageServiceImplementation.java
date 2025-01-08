@@ -296,11 +296,11 @@ public class ImageServiceImplementation implements ImageService {
     public ResponseEntity<Page<ImageWithUserLikeDTO>> getImagesRandom(User user, Pageable pageable) {
         try {
             if (user != null){
-                logger.debug("Logged user - getImagesRandom");
+                logger.info("Logged user - getImagesRandom");
                 Page<ImageWithUserLikeDTO> images = imageRepository.findOpenImagesByRandomLoggedUser(user.getId(), pageable);
                 return new ResponseEntity<>(images, HttpStatus.OK);
             }else {
-                logger.debug("No logged user - getImagesRandom");
+                logger.info("No logged user - getImagesRandom");
                 Page<ImageWithUserLikeDTO> image = imageRepository.findOpenImagesByRandomNotLoggedUser(pageable);
                 return new ResponseEntity<>(image, HttpStatus.OK);
             }

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -142,10 +143,6 @@ public class AccountServiceImplementation implements AccountService {
         Optional<User> fetchedUser = userRepository.findById(user.getId());
         if (fetchedUser.isPresent()) {
             try {
-                logger.info(updateUserInformationDTO.getUsername());
-                logger.info(updateUserInformationDTO.getDescription());
-                logger.info(updateUserInformationDTO.getAvatar());
-                logger.info(updateUserInformationDTO.getPassword());
                 if (updateUserInformationDTO.getUsername() != null && !updateUserInformationDTO.getUsername().isEmpty() && !updateUserInformationDTO.getUsername().equals(fetchedUser.get().getUsername())) {
                     boolean isExistUser = userRepository.existsByUsername(updateUserInformationDTO.getUsername());
                     if (isExistUser) {
@@ -200,14 +197,23 @@ public class AccountServiceImplementation implements AccountService {
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
+
             UUID randomUUID = UUID.randomUUID();
             String fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase();
             String savedFileName = randomUUID.toString() + "." + fileExtension;
             Path filePath = uploadPath.resolve(savedFileName);
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
+            try {
+                File oldAvatar = new File(storagePath + user.getAvatar());
+                oldAvatar.delete();
+            }catch (Exception e){
+                logger.error("Error while deleting old avatar", e);
+            }
+
             user.setAvatar(savedFileName);
             userRepository.save(user);
+
             return ResponseEntity.ok(HttpStatus.OK);
 
         }catch (Exception e){
