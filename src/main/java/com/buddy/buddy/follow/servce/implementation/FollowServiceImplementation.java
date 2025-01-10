@@ -75,9 +75,20 @@ public class FollowServiceImplementation implements FollowService {
     }
 
     @Override
-    public ResponseEntity<Page<GetUserInformationDTO>> follows(User user, Pageable pageable) {
+    public ResponseEntity<Page<GetUserInformationDTO>> getFollowers(User user, Pageable pageable) {
         try {
-            Page<GetUserInformationDTO> getUserInformationDTOS = followRepository.findFollowedByUser(user.getId(), pageable);
+            Page<GetUserInformationDTO> getUserInformationDTOS = followRepository.findFollowersForUser(user.getId(), pageable);
+            return new ResponseEntity<>(getUserInformationDTOS, HttpStatus.OK);
+        }catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
+        }
+    }
+
+    @Override
+    public ResponseEntity<Page<GetUserInformationDTO>> getFollowed(User user, Pageable pageable) {
+        try {
+            Page<GetUserInformationDTO> getUserInformationDTOS = followRepository.findFollowedForUser(user.getId(), pageable);
             return new ResponseEntity<>(getUserInformationDTOS, HttpStatus.OK);
         }catch (Exception e) {
             logger.error(e.getMessage());

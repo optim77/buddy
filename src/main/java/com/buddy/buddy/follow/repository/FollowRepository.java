@@ -25,7 +25,11 @@ public interface FollowRepository extends JpaRepository<Follow, UUID> {
     @Query("DELETE FROM Follow f WHERE f.follower.id = :user_id AND f.followedTo.id = :followed_to")
     void deleteByUserAndFollowedTo(@Param("user_id") UUID user_id, @Param("followed_to") UUID followed_to);
 
-    @Query("SELECT new com.buddy.buddy.account.DTO.GetUserInformationDTO(u) FROM Subscription s JOIN s.subscribedTo u " +
-            "WHERE s.subscriber.id = :user_id AND u.deleted = false AND u.locked = false AND u.active = true ")
-    Page<GetUserInformationDTO> findFollowedByUser(@Param("user_id") UUID user_id, Pageable pageable);
+    @Query("SELECT new com.buddy.buddy.account.DTO.GetUserInformationDTO(f.follower) FROM Follow f " +
+            "WHERE f.followedTo.id = :user_id AND f.follower.deleted = false AND f.follower.locked = false AND f.follower.active = true ")
+    Page<GetUserInformationDTO> findFollowersForUser(@Param("user_id") UUID user_id, Pageable pageable);
+
+    @Query("SELECT new com.buddy.buddy.account.DTO.GetUserInformationDTO(f.followedTo) FROM Follow f " +
+            "WHERE f.followedTo.id = :user_id")
+    Page<GetUserInformationDTO> findFollowedForUser(@Param("user_id") UUID user_id, Pageable pageable);
 }
