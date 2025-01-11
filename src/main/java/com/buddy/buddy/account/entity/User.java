@@ -85,6 +85,24 @@ public class User implements UserDetails {
     @Column
     private int following;
 
+    @Column
+    private String socialInstagram;
+
+    @Column
+    private String socialFacebook;
+
+    @Column
+    private String socialYoutube;
+
+    @Column
+    private String socialTwitter;
+
+    @Column
+    private String socialTikTok;
+
+    @Column
+    private String socialOF;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Like> likes;
 

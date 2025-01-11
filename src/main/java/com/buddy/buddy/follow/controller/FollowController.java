@@ -35,8 +35,8 @@ public class FollowController {
         return followService.getFollowers(user, pageable);
     }
 
-    @GetMapping("/followed")
-    public ResponseEntity<Page<GetUserInformationDTO>> getFollowed(@AuthenticationPrincipal User user, Pageable pageable){
-        return followService.getFollowed(user, pageable);
+    @GetMapping("/following")
+    public ResponseEntity<Page<GetUserInformationDTO>> getFollowing(@AuthenticationPrincipal User user, Pageable pageable){
+        return followService.getFollowing(user, pageable);
     }
 }

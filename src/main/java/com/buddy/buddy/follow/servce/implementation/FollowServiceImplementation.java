@@ -86,9 +86,9 @@ public class FollowServiceImplementation implements FollowService {
     }
 
     @Override
-    public ResponseEntity<Page<GetUserInformationDTO>> getFollowed(User user, Pageable pageable) {
+    public ResponseEntity<Page<GetUserInformationDTO>> getFollowing(User user, Pageable pageable) {
         try {
-            Page<GetUserInformationDTO> getUserInformationDTOS = followRepository.findFollowedForUser(user.getId(), pageable);
+            Page<GetUserInformationDTO> getUserInformationDTOS = followRepository.findFollowingForUser(user.getId(), pageable);
             return new ResponseEntity<>(getUserInformationDTOS, HttpStatus.OK);
         }catch (Exception e) {
             logger.error(e.getMessage());

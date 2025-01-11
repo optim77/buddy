@@ -65,10 +65,9 @@ public class ImageServiceImplementation implements ImageService {
                     .map(dto -> {
                         Set<String> tags = imageRepository.findTagsByImageId(imageId);
                         ImageWithUserLikeAndTagsDTO imageWithUserLikeAndTagsDTO = new ImageWithUserLikeAndTagsDTO(dto, tags);
-                        if (dto.isOpen() || isSubscriber(user.getId(), dto.getUserId()) || user.getId().equals(dto.getUserId())) {
-                            return new ResponseEntity<>(imageWithUserLikeAndTagsDTO, HttpStatus.OK);
+                        if (!dto.isOpen() && !isSubscriber(user.getId(), dto.getUserId()) && !user.getId().equals(dto.getUserId())) {
+                            imageWithUserLikeAndTagsDTO.setImageUrl("");
                         }
-                        dto.setImageUrl("");
                         return new ResponseEntity<>(imageWithUserLikeAndTagsDTO, HttpStatus.OK);
                     })
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found"));
@@ -96,7 +95,7 @@ public class ImageServiceImplementation implements ImageService {
                 boolean isSubscriber = isSubscriber(user.getId(), authorId);
                 Page<ImageWithUserLikeDTO> images =  imageRepository.findImagesByUserIdWithUserAndLikeStatus(authorId, user.getId(), pageable).map(image -> {
                     //check if visitor is author also || user.getId().equals(image.getUserId())
-                    if (!image.isOpen() && !isSubscriber && user.getId().equals(image.getUserId())) {
+                    if (!image.isOpen() && !isSubscriber && !user.getId().equals(image.getUserId())) {
                         image.setImageUrl("");
                     }
                     return image;
@@ -165,10 +164,13 @@ public class ImageServiceImplementation implements ImageService {
             Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
                 Optional<Tag> existingTag = tagRepository.findById(tag);
                 if (existingTag.isPresent()) {
+                    existingTag.get().setCount(existingTag.get().getCount() + 1);
+                    tagRepository.save(existingTag.get());
                     return existingTag.get();
                 } else {
                     Tag newTag = new Tag();
                     newTag.setName(tag);
+                    newTag.setCount(1);
                     return tagRepository.save(newTag);
                 }
             }).collect(Collectors.toSet());
@@ -234,14 +236,24 @@ public class ImageServiceImplementation implements ImageService {
                 Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
                     Optional<Tag> existed_tag = tagRepository.findById(tag);
                     if (existed_tag.isPresent()) {
+                        existed_tag.get().setCount(existed_tag.get().getCount() + 1);
+                        tagRepository.save(existed_tag.get());
                         return existed_tag.get();
                     }else {
                         Tag new_tag = new Tag();
                         new_tag.setName(tag);
+                        new_tag.setCount(1);
                         return tagRepository.save(new_tag);
                     }
                 }).collect(Collectors.toSet());
                 image.setTags(tags);
+                List<String> tagsToRemove = new ArrayList<>(currentTagNames);
+                tagsToRemove.removeAll(uploadImageDTO.getTagSet());
+                tagsToRemove.stream().map(tag -> {
+                    Optional<Tag> existingTag = tagRepository.findByName(tag);
+                    existingTag.get().setCount(existingTag.get().getCount() - 1);
+                    return null;
+                });
             }
 
             imageRepository.save(image);
@@ -260,7 +272,12 @@ public class ImageServiceImplementation implements ImageService {
             logger.debug("Deleting image by logged user, image {}", imageId);
             try{
                 imageRepository.setDeleteImageById(imageId);
-
+                Optional<Image> image = imageRepository.findById(imageId);
+                image.ifPresent(value -> value.getTags().stream().map(tag -> {
+                    Optional<Tag> tag1 = tagRepository.findByName(tag.getName());
+                    tag1.ifPresent(tag2 -> tag2.setCount(tag2.getCount() - 1));
+                    return null;
+                }));
                 user.setPosts(user.getPosts() - 1);
                 userRepository.save(user);
 

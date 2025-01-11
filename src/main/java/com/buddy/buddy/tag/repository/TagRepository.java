@@ -25,6 +25,8 @@ public interface TagRepository extends JpaRepository<Tag, String> {
     @Query("select t from Tag t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :tag_name, '%')) ORDER BY t.name")
     Page<Tag> findByNameContainingIgnoreCaseToAdd(@Param("tag_name") String tag_name, Pageable pageable);
 
+    Optional<Tag> findByName(String name);
+
 //    // To change
 //    @Query("SELECT i FROM Image i JOIN i.tags t WHERE t.name = :tagName")
 //    Page<Image> findImagesByTagName(@Param("tagName") String tagName);

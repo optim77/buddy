@@ -30,6 +30,6 @@ public interface FollowRepository extends JpaRepository<Follow, UUID> {
     Page<GetUserInformationDTO> findFollowersForUser(@Param("user_id") UUID user_id, Pageable pageable);
 
     @Query("SELECT new com.buddy.buddy.account.DTO.GetUserInformationDTO(f.followedTo) FROM Follow f " +
-            "WHERE f.followedTo.id = :user_id")
-    Page<GetUserInformationDTO> findFollowedForUser(@Param("user_id") UUID user_id, Pageable pageable);
+            "WHERE f.follower.id = :user_id AND f.followedTo.deleted = false")
+    Page<GetUserInformationDTO> findFollowingForUser(@Param("user_id") UUID user_id, Pageable pageable);
 }
