@@ -61,7 +61,7 @@ public class ImageController {
     }
 
     @PutMapping("/image/update/{image_id}")
-    private ResponseEntity<HttpStatus> updateImage(@RequestBody UpdateImageDTO uploadImageDTO, @PathVariable UUID image_id, @AuthenticationPrincipal User user) {
+    private ResponseEntity<HttpStatus> updateImage(@ModelAttribute UpdateImageDTO uploadImageDTO, @PathVariable UUID image_id, @AuthenticationPrincipal User user) {
         return imageService.updateImage(uploadImageDTO, image_id, user);
     }
 

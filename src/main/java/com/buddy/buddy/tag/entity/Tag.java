@@ -1,16 +1,11 @@
 package com.buddy.buddy.tag.entity;
 
-import com.buddy.buddy.image.entity.Image;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.Valid;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table
@@ -26,6 +21,16 @@ public class Tag {
 
     @Column
     private int count;
+
+    @Column
+    private String firstImage;
+
+    @Column
+    private String secondImage;
+
+    @Column
+    private String thirdImage;
+
 
 
 }

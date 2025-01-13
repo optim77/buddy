@@ -123,11 +123,6 @@ public class ImageServiceImplementation implements ImageService {
 
         try {
             logger.info("Creating and saving media");
-            logger.info("Received DTO: file={}, description={}, tags={}, open={}",
-                    uploadImageDTO.getFile(),
-                    uploadImageDTO.getDescription(),
-                    uploadImageDTO.getTagSet(),
-                    uploadImageDTO.isOpen());
 
             if (uploadImageDTO.getTagSet().size() > 20){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TagSet size too large");
@@ -236,8 +231,6 @@ public class ImageServiceImplementation implements ImageService {
                 Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
                     Optional<Tag> existed_tag = tagRepository.findById(tag);
                     if (existed_tag.isPresent()) {
-                        existed_tag.get().setCount(existed_tag.get().getCount() + 1);
-                        tagRepository.save(existed_tag.get());
                         return existed_tag.get();
                     }else {
                         Tag new_tag = new Tag();
@@ -249,10 +242,12 @@ public class ImageServiceImplementation implements ImageService {
                 image.setTags(tags);
                 List<String> tagsToRemove = new ArrayList<>(currentTagNames);
                 tagsToRemove.removeAll(uploadImageDTO.getTagSet());
-                tagsToRemove.stream().map(tag -> {
+                tagsToRemove.forEach(tag -> {
                     Optional<Tag> existingTag = tagRepository.findByName(tag);
-                    existingTag.get().setCount(existingTag.get().getCount() - 1);
-                    return null;
+                    existingTag.ifPresent(value -> {
+                        value.setCount(existingTag.get().getCount() - 1);
+                        tagRepository.save(existingTag.get());
+                    });
                 });
             }
 
@@ -273,11 +268,15 @@ public class ImageServiceImplementation implements ImageService {
             try{
                 imageRepository.setDeleteImageById(imageId);
                 Optional<Image> image = imageRepository.findById(imageId);
-                image.ifPresent(value -> value.getTags().stream().map(tag -> {
-                    Optional<Tag> tag1 = tagRepository.findByName(tag.getName());
-                    tag1.ifPresent(tag2 -> tag2.setCount(tag2.getCount() - 1));
-                    return null;
-                }));
+                image.ifPresent(value -> {
+                    value.getTags().forEach(tag -> {
+                        Optional<Tag> tag1 = tagRepository.findByName(tag.getName());
+                        tag1.ifPresent(tag2 -> {
+                            tag2.setCount(tag2.getCount() - 1);
+                            tagRepository.save(tag2);
+                        });
+                    });
+                });
                 user.setPosts(user.getPosts() - 1);
                 userRepository.save(user);
 

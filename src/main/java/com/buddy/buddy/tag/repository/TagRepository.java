@@ -1,5 +1,6 @@
 package com.buddy.buddy.tag.repository;
 
+import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.entity.Image;
 import com.buddy.buddy.tag.entity.Tag;
 import org.springframework.data.domain.Page;
@@ -16,14 +17,17 @@ import java.util.UUID;
 @Repository
 public interface TagRepository extends JpaRepository<Tag, String> {
 
-    @Query("select t from Tag t ORDER BY RANDOM()")
+    @Query("SELECT t FROM Tag t WHERE t.count > 0 ORDER BY RANDOM()")
     Page<Tag> findAllOrderByName(Pageable pageable);
 
-    @Query("select t from Tag t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :tag_name, '%')) ORDER BY t.name")
+    @Query("SELECT t FROM Tag t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :tag_name, '%')) ORDER BY t.name")
     Optional<Tag> findByNameContainingIgnoreCase(@Param("tag_name") String tag_name);
 
-    @Query("select t from Tag t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :tag_name, '%')) ORDER BY t.name")
+    @Query("SELECT t FROM Tag t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :tag_name, '%')) ORDER BY t.name")
     Page<Tag> findByNameContainingIgnoreCaseToAdd(@Param("tag_name") String tag_name, Pageable pageable);
+
+    @Query("")
+    Page<ImageWithUserLikeDTO> getMediaForTag(@Param("tag_name") String tag_name, Pageable pageable);
 
     Optional<Tag> findByName(String name);
 

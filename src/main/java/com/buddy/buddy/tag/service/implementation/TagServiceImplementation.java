@@ -1,7 +1,7 @@
 package com.buddy.buddy.tag.service.implementation;
 
 import com.buddy.buddy.account.entity.User;
-import com.buddy.buddy.image.service.implementation.ImageServiceImplementation;
+import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.tag.DTO.AddTagDTO;
 import com.buddy.buddy.tag.entity.Tag;
 import com.buddy.buddy.tag.repository.TagRepository;
@@ -13,7 +13,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -63,5 +62,10 @@ public class TagServiceImplementation implements TagService {
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public ResponseEntity<Page<ImageWithUserLikeDTO>> mediaTag(String tagName, User user, Pageable pageable) {
+        return null;
     }
 }
