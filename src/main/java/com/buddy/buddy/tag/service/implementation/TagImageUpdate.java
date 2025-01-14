@@ -14,11 +14,9 @@ import java.util.List;
 public class TagImageUpdate {
 
     private final TagRepository tagRepository;
-    private final ImageRepository imageRepository;
 
-    public TagImageUpdate(TagRepository tagRepository, ImageRepository imageRepository) {
+    public TagImageUpdate(TagRepository tagRepository) {
         this.tagRepository = tagRepository;
-        this.imageRepository = imageRepository;
     }
 
     @Transactional
@@ -26,7 +24,11 @@ public class TagImageUpdate {
     public void updateTagImages() {
         List<Tag> tags = tagRepository.findAll();
         tags.forEach(tag -> {
-
+            List<String> images = tagRepository.getMediaForTag(tag.getName());
+            tag.setFirstImage(images.get(0));
+            tag.setFirstImage(images.get(1));
+            tag.setFirstImage(images.get(2));
+            tagRepository.save(tag);
         });
 
     }

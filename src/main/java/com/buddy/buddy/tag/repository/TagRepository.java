@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -26,8 +27,8 @@ public interface TagRepository extends JpaRepository<Tag, String> {
     @Query("SELECT t FROM Tag t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :tag_name, '%')) ORDER BY t.name")
     Page<Tag> findByNameContainingIgnoreCaseToAdd(@Param("tag_name") String tag_name, Pageable pageable);
 
-    @Query("")
-    Page<ImageWithUserLikeDTO> getMediaForTag(@Param("tag_name") String tag_name, Pageable pageable);
+    @Query("SELECT i.id FROM Image i JOIN i.tags t WHERE t.name = :tag_name ORDER BY i.likeCount DESC LIMIT 3")
+    List<String> getMediaForTag(@Param("tag_name") String tag_name);
 
     Optional<Tag> findByName(String name);
 
