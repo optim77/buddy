@@ -60,7 +60,8 @@ public class SecurityConfig {
                 )
                 .authorizeRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/public/**", "/register", "/authenticate", "/image/**","/image/user/**", "/images/**", "/loops", "/user/**").permitAll() // /images/** is permitted because is checking in controller
+                        .requestMatchers("/public/**", "/register", "/authenticate", "/image/**",
+                                "/image/user/**", "/images/**", "/loops/**", "/user/**", "image/open/random/**", "/tags/**").permitAll() // /images/** is permitted because is checking in controller
                         .requestMatchers("/image/upload").authenticated()
                         .requestMatchers("/image/update/{image_id}").authenticated()
                         .requestMatchers("/image/delete/{image_id}").authenticated()
