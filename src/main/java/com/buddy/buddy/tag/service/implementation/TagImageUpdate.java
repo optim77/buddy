@@ -24,7 +24,7 @@ public class TagImageUpdate {
     public void updateTagImages() {
         List<Tag> tags = tagRepository.findAll();
         tags.forEach(tag -> {
-            List<String> images = tagRepository.getMediaForTag(tag.getName());
+            List<String> images = tagRepository.getMediaForTagIcons(tag.getName());
             tag.setFirstImage(images.get(0));
             tag.setFirstImage(images.get(1));
             tag.setFirstImage(images.get(2));

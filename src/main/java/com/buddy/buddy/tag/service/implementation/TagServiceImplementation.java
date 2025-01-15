@@ -66,6 +66,17 @@ public class TagServiceImplementation implements TagService {
 
     @Override
     public ResponseEntity<Page<ImageWithUserLikeDTO>> mediaTag(String tagName, User user, Pageable pageable) {
-        return null;
+        try {
+            if (user != null){
+                logger.info("Getting media tag for logged user: {}", user.getUsername());
+                return new ResponseEntity<>(tagRepository.findOpenRandomMediaByTagForLoggedUser(tagName, user.getId(), pageable), HttpStatus.OK);
+            }else{
+                logger.info("Getting media tag for not logged user");
+                return new ResponseEntity<>(tagRepository.findOpenRandomMediaByTagForNotLoggedUser(tagName, pageable), HttpStatus.OK);
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

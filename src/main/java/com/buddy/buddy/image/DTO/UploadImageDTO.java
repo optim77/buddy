@@ -14,5 +14,5 @@ public class UploadImageDTO {
     private String description;
     private boolean open;
     private MultipartFile file;
-    private List<String> tagSet = new ArrayList<>();
+    private Set<String> tagSet = new HashSet<>();
 }

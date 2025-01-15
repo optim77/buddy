@@ -25,12 +25,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -120,56 +127,30 @@ public class ImageServiceImplementation implements ImageService {
 
     @Override
     public ResponseEntity<UUID> uploadImage(UploadImageDTO uploadImageDTO, User user) {
-
         try {
             logger.info("Creating and saving media");
 
-            if (uploadImageDTO.getTagSet().size() > 20){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TagSet size too large");
-            }
-            if (uploadImageDTO.getDescription().length() > 2048){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description too long");
-            }
+            validateUploadImageDTO(uploadImageDTO);
 
             MultipartFile file = uploadImageDTO.getFile();
             validateFile(file);
 
-            Path uploadPath = Paths.get(storagePath);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
             UUID randomUUID = UUID.randomUUID();
-            String fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1).toLowerCase();
-            String savedFileName = randomUUID.toString() + "." + fileExtension;
-            Path filePath = uploadPath.resolve(savedFileName);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            String fileExtension = getFileExtension(file);
+            Path savedFilePath = saveFile(file, randomUUID, fileExtension);
+            String blurredUrl = "";
+            if (!uploadImageDTO.isOpen()){
+                blurredUrl = createBlurredImage(savedFilePath, fileExtension);
+            }
 
-            Image image = new Image();
-            image.setUploadedDate(new Date());
-            image.setDescription(uploadImageDTO.getDescription());
-            image.setUser(user);
-            image.setUrl(filePath.toString());
-            image.setOpen(uploadImageDTO.isOpen());
-            image.setMediaType(detectMediaType(fileExtension));
-            image.setId(randomUUID);
-
+            Image image = createImageEntity(uploadImageDTO, user, savedFilePath.toString(), blurredUrl, fileExtension, randomUUID);
             user.setPosts(user.getPosts() + 1);
             userRepository.save(user);
 
-            Set<Tag> tags = uploadImageDTO.getTagSet().stream().map(tag -> {
-                Optional<Tag> existingTag = tagRepository.findById(tag);
-                if (existingTag.isPresent()) {
-                    existingTag.get().setCount(existingTag.get().getCount() + 1);
-                    tagRepository.save(existingTag.get());
-                    return existingTag.get();
-                } else {
-                    Tag newTag = new Tag();
-                    newTag.setName(tag);
-                    newTag.setCount(1);
-                    return tagRepository.save(newTag);
-                }
-            }).collect(Collectors.toSet());
+            Set<Tag> tags = processTags(uploadImageDTO.getTagSet());
             image.setTags(tags);
+
+
 
             imageRepository.save(image);
             return new ResponseEntity<>(randomUUID, HttpStatus.CREATED);
@@ -353,4 +334,113 @@ public class ImageServiceImplementation implements ImageService {
         logger.info("User not found in subscriptions");
         return false;
     }
+
+    private void validateUploadImageDTO(UploadImageDTO uploadImageDTO) {
+        if (uploadImageDTO.getTagSet().size() > 20) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TagSet size too large");
+        }
+        if (uploadImageDTO.getDescription().length() > 2048) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description too long");
+        }
+    }
+
+    private String getFileExtension(MultipartFile file) {
+        return file.getOriginalFilename()
+                .substring(file.getOriginalFilename().lastIndexOf('.') + 1)
+                .toLowerCase();
+    }
+
+    private Path saveFile(MultipartFile file, UUID uuid, String extension) throws IOException {
+        Path uploadPath = Paths.get(storagePath);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        String savedFileName = uuid.toString() + "." + extension;
+        Path filePath = uploadPath.resolve(savedFileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return filePath;
+    }
+
+    private Image createImageEntity(UploadImageDTO dto, User user, String url, String blurredUrl, String mediaType, UUID uuid) {
+        Image image = new Image();
+        image.setUploadedDate(new Date());
+        image.setDescription(dto.getDescription());
+        image.setUser(user);
+        image.setUrl(url);
+        image.setBlurredUrl(blurredUrl);
+        image.setOpen(dto.isOpen());
+        image.setMediaType(detectMediaType(mediaType));
+        image.setId(uuid);
+        return image;
+    }
+
+    private Set<Tag> processTags(Set<String> tagSet) {
+        return tagSet.stream().map(tag -> {
+            Optional<Tag> existingTag = tagRepository.findById(tag);
+            if (existingTag.isPresent()) {
+                Tag tagEntity = existingTag.get();
+                tagEntity.setCount(tagEntity.getCount() + 1);
+                return tagRepository.save(tagEntity);
+            } else {
+                Tag newTag = new Tag();
+                newTag.setName(tag);
+                newTag.setCount(1);
+                return tagRepository.save(newTag);
+            }
+        }).collect(Collectors.toSet());
+    }
+
+    private String createBlurredImage(Path originalImagePath, String extension) {
+        try {
+
+            BufferedImage originalImage = ImageIO.read(originalImagePath.toFile());
+            BufferedImage blurredImage = blurImage(originalImage);
+
+            String blurredFileName = "blurred-" + originalImagePath.getFileName().toString();
+            Path blurredImagePath = originalImagePath.getParent().resolve(blurredFileName);
+            ImageIO.write(blurredImage, extension, blurredImagePath.toFile());
+            logger.info("Blurred image saved to: " + blurredImagePath);
+            return blurredFileName;
+
+        } catch (IOException e) {
+            logger.error("Failed to create blurred image: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create blurred image");
+        }
+    }
+
+    private BufferedImage blurImage(BufferedImage image) {
+        int edgeSize = 32;
+        int extendedWidth = image.getWidth() + 2 * edgeSize;
+        int extendedHeight = image.getHeight() + 2 * edgeSize;
+
+        BufferedImage extendedImage = new BufferedImage(extendedWidth, extendedHeight, image.getType());
+        Graphics2D g2d = extendedImage.createGraphics();
+
+        g2d.drawImage(image, edgeSize, edgeSize, null);
+
+        g2d.drawImage(image, edgeSize, 0, edgeSize + image.getWidth(), edgeSize, 0, 0, image.getWidth(), 1, null);
+        g2d.drawImage(image, edgeSize, edgeSize + image.getHeight(), edgeSize + image.getWidth(), extendedHeight, 0, image.getHeight() - 1, image.getWidth(), image.getHeight(), null);
+
+        g2d.drawImage(image, 0, edgeSize, edgeSize, edgeSize + image.getHeight(), 0, 0, 1, image.getHeight(), null);
+        g2d.drawImage(image, edgeSize + image.getWidth(), edgeSize, extendedWidth, edgeSize + image.getHeight(), image.getWidth() - 1, 0, image.getWidth(), image.getHeight(), null);
+
+        g2d.drawImage(image, 0, 0, edgeSize, edgeSize, 0, 0, 1, 1, null);
+        g2d.drawImage(image, edgeSize + image.getWidth(), 0, extendedWidth, edgeSize, image.getWidth() - 1, 0, image.getWidth(), 1, null);
+        g2d.drawImage(image, 0, edgeSize + image.getHeight(), edgeSize, extendedHeight, 0, image.getHeight() - 1, 1, image.getHeight(), null);
+        g2d.drawImage(image, edgeSize + image.getWidth(), edgeSize + image.getHeight(), extendedWidth, extendedHeight, image.getWidth() - 1, image.getHeight() - 1, image.getWidth(), image.getHeight(), null);
+        g2d.dispose();
+
+        float[] matrix = new float[4096];
+        Arrays.fill(matrix, 1.0f / 4096.0f);
+        Kernel kernel = new Kernel(64, 64, matrix);
+        ConvolveOp op = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+
+        BufferedImage blurredExtendedImage = new BufferedImage(extendedWidth, extendedHeight, image.getType());
+        op.filter(extendedImage, blurredExtendedImage);
+
+        return blurredExtendedImage.getSubimage(edgeSize, edgeSize, image.getWidth(), image.getHeight());
+    }
+
+
+
 }

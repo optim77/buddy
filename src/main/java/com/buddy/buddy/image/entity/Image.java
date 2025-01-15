@@ -46,6 +46,9 @@ public class Image {
     private String url;
 
     @Column
+    private String blurredUrl;
+
+    @Column
     private boolean deleted = false;
 
     @Enumerated(EnumType.STRING)

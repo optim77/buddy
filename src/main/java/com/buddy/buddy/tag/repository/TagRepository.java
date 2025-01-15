@@ -27,8 +27,40 @@ public interface TagRepository extends JpaRepository<Tag, String> {
     @Query("SELECT t FROM Tag t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :tag_name, '%')) ORDER BY t.name")
     Page<Tag> findByNameContainingIgnoreCaseToAdd(@Param("tag_name") String tag_name, Pageable pageable);
 
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(" +
+            "i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, " +
+            "u.id, u.username, u.avatar, u.createdAt, i.mediaType, " +
+            "CASE WHEN (l IS NOT NULL) THEN true ELSE false END) " +
+            "FROM Image i " +
+            "JOIN i.user u " +
+            "LEFT JOIN Like l ON l.image.id = i.id AND l.user.id = :user_id " +
+            "JOIN i.tags t " +
+            "WHERE t.name = :tag_name " +
+            "AND u.locked = false AND u.deleted = false AND u.active = true " +
+            "AND i.deleted = false AND i.open = true " +
+            "ORDER BY RANDOM()")
+    Page<ImageWithUserLikeDTO> findOpenRandomMediaByTagForLoggedUser(
+            @Param("tag_name") String tag_name,
+            @Param("user_id") UUID user_id,
+            Pageable pageable);
+
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(" +
+            "i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, " +
+            "u.id, u.username, u.avatar, u.createdAt, i.mediaType, " +
+            "false) " +
+            "FROM Image i " +
+            "JOIN i.user u " +
+            "JOIN i.tags t " +
+            "WHERE t.name = :tag_name " +
+            "AND u.locked = false AND u.deleted = false AND u.active = true " +
+            "AND i.deleted = false AND i.open = true " +
+            "ORDER BY RANDOM()")
+    Page<ImageWithUserLikeDTO> findOpenRandomMediaByTagForNotLoggedUser(
+            @Param("tag_name") String tag_name,
+            Pageable pageable);
+
     @Query("SELECT i.id FROM Image i JOIN i.tags t WHERE t.name = :tag_name ORDER BY i.likeCount DESC LIMIT 3")
-    List<String> getMediaForTag(@Param("tag_name") String tag_name);
+    List<String> getMediaForTagIcons(@Param("tag_name") String tag_name);
 
     Optional<Tag> findByName(String name);
 
