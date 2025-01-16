@@ -17,6 +17,7 @@ public class ImageWithUserLikeDTO   {
 
     private UUID imageId;
     private String imageUrl;
+    private String blurredUrl;
     private String description;
     private Date uploadedDate;
     private int likeCount;

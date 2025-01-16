@@ -127,6 +127,7 @@ public class ImageServiceImplementation implements ImageService {
 
     @Override
     public ResponseEntity<UUID> uploadImage(UploadImageDTO uploadImageDTO, User user) {
+        // TODO: Blur video somehow
         try {
             logger.info("Creating and saving media");
 
@@ -139,21 +140,20 @@ public class ImageServiceImplementation implements ImageService {
             String fileExtension = getFileExtension(file);
             Path savedFilePath = saveFile(file, randomUUID, fileExtension);
             String blurredUrl = "";
-            Path blurredFilePath = savedFilePath.getParent();
-            if (!uploadImageDTO.isOpen()){
+            String blurredFilePath = null;
+            if (!uploadImageDTO.isOpen()) {
                 blurredUrl = createBlurredImage(savedFilePath, fileExtension);
                 Path uploadPath = Paths.get(storagePath);
                 String blurredSavedFileName = blurredUrl + "." + fileExtension;
-                blurredFilePath = uploadPath.resolve(blurredSavedFileName);
+                blurredFilePath = uploadPath.resolve(blurredSavedFileName).toString();
             }
 
-            Image image = createImageEntity(uploadImageDTO, user, savedFilePath.toString(), blurredFilePath.toString(), fileExtension, randomUUID);
+            Image image = createImageEntity(uploadImageDTO, user, savedFilePath.toString(), blurredFilePath, fileExtension, randomUUID);
             user.setPosts(user.getPosts() + 1);
             userRepository.save(user);
 
             Set<Tag> tags = processTags(uploadImageDTO.getTagSet());
             image.setTags(tags);
-
 
 
             imageRepository.save(image);
@@ -200,7 +200,6 @@ public class ImageServiceImplementation implements ImageService {
 
     @Override
     public ResponseEntity<HttpStatus> updateImage(UpdateImageDTO uploadImageDTO, UUID image_id, User user){
-        // TODO: update tags
         try {
             Image image = imageRepository.findById(image_id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found"));
             if (!uploadImageDTO.getDescription().equals(image.getDescription())) {
@@ -411,6 +410,7 @@ public class ImageServiceImplementation implements ImageService {
     }
 
     private BufferedImage blurImage(BufferedImage image) {
+        // TODO: need optimization
         int edgeSize = 32;
         int extendedWidth = image.getWidth() + 2 * edgeSize;
         int extendedHeight = image.getHeight() + 2 * edgeSize;

@@ -16,7 +16,7 @@ import java.util.UUID;
 public interface FavoriteRepository extends JpaRepository<Favorite, UUID> {
     Optional<Favorite> findByid(UUID uuid);
 
-    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(f.image.id, f.image.url, f.image.description, f.image.uploadedDate, " +
+    @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(f.image.id, f.image.url, f.image.blurredUrl, f.image.description, f.image.uploadedDate, " +
             "f.image.likeCount, f.image.open, u.id, u.username, u.avatar, u.createdAt, f.image.mediaType, " +
             "CASE WHEN (l IS NOT NULL) THEN true ELSE false END) " +
             "FROM Favorite f " +

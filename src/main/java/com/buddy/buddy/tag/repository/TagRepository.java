@@ -28,7 +28,7 @@ public interface TagRepository extends JpaRepository<Tag, String> {
     Page<Tag> findByNameContainingIgnoreCaseToAdd(@Param("tag_name") String tag_name, Pageable pageable);
 
     @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(" +
-            "i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, " +
+            "i.id, i.url, i.blurredUrl, i.description, i.uploadedDate, i.likeCount, i.open, " +
             "u.id, u.username, u.avatar, u.createdAt, i.mediaType, " +
             "CASE WHEN (l IS NOT NULL) THEN true ELSE false END) " +
             "FROM Image i " +
@@ -45,7 +45,7 @@ public interface TagRepository extends JpaRepository<Tag, String> {
             Pageable pageable);
 
     @Query("SELECT new com.buddy.buddy.image.DTO.ImageWithUserLikeDTO(" +
-            "i.id, i.url, i.description, i.uploadedDate, i.likeCount, i.open, " +
+            "i.id, i.url, i.blurredUrl, i.description, i.uploadedDate, i.likeCount, i.open, " +
             "u.id, u.username, u.avatar, u.createdAt, i.mediaType, " +
             "false) " +
             "FROM Image i " +

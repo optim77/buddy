@@ -19,6 +19,7 @@ public class ImageWithUserLikeAndTagsDTO {
 
     private UUID imageId;
     private String imageUrl;
+    private String blurredUrl;
     private String description;
     private Date uploadedDate;
     private int likeCount;
@@ -35,6 +36,7 @@ public class ImageWithUserLikeAndTagsDTO {
     public ImageWithUserLikeAndTagsDTO(ImageWithUserLikeDTO imageWithUserLikeDTO, Set<String> tags) {
         this.imageId = imageWithUserLikeDTO.getImageId();
         this.imageUrl = imageWithUserLikeDTO.getImageUrl();
+        this.blurredUrl = imageWithUserLikeDTO.getBlurredUrl();
         this.description = imageWithUserLikeDTO.getDescription();
         this.uploadedDate = imageWithUserLikeDTO.getUploadedDate();
         this.likeCount = imageWithUserLikeDTO.getLikeCount();
