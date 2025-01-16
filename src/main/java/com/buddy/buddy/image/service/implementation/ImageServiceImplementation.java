@@ -139,11 +139,15 @@ public class ImageServiceImplementation implements ImageService {
             String fileExtension = getFileExtension(file);
             Path savedFilePath = saveFile(file, randomUUID, fileExtension);
             String blurredUrl = "";
+            Path blurredFilePath = savedFilePath.getParent();
             if (!uploadImageDTO.isOpen()){
                 blurredUrl = createBlurredImage(savedFilePath, fileExtension);
+                Path uploadPath = Paths.get(storagePath);
+                String blurredSavedFileName = blurredUrl + "." + fileExtension;
+                blurredFilePath = uploadPath.resolve(blurredSavedFileName);
             }
 
-            Image image = createImageEntity(uploadImageDTO, user, savedFilePath.toString(), blurredUrl, fileExtension, randomUUID);
+            Image image = createImageEntity(uploadImageDTO, user, savedFilePath.toString(), blurredFilePath.toString(), fileExtension, randomUUID);
             user.setPosts(user.getPosts() + 1);
             userRepository.save(user);
 
@@ -392,18 +396,16 @@ public class ImageServiceImplementation implements ImageService {
 
     private String createBlurredImage(Path originalImagePath, String extension) {
         try {
-
             BufferedImage originalImage = ImageIO.read(originalImagePath.toFile());
             BufferedImage blurredImage = blurImage(originalImage);
-
-            String blurredFileName = "blurred-" + originalImagePath.getFileName().toString();
+            String blurredImageId = UUID.randomUUID().toString();
+            String blurredFileName = blurredImageId + "." + extension;
             Path blurredImagePath = originalImagePath.getParent().resolve(blurredFileName);
             ImageIO.write(blurredImage, extension, blurredImagePath.toFile());
-            logger.info("Blurred image saved to: " + blurredImagePath);
-            return blurredFileName;
-
+            logger.info("Blurred image saved to: {}", blurredImagePath);
+            return blurredImageId;
         } catch (IOException e) {
-            logger.error("Failed to create blurred image: " + e.getMessage());
+            logger.error("Failed to create blurred image: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create blurred image");
         }
     }
