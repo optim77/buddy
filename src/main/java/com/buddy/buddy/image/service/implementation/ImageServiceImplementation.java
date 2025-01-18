@@ -176,7 +176,7 @@ public class ImageServiceImplementation implements ImageService {
     }
 
     public static void validateFile(MultipartFile file) {
-        final Set<String> allowedExtensions = Set.of("jpg", "jpeg", "png", "gif", "mp4", "mov");
+        final Set<String> allowedExtensions = Set.of("jpg", "jpeg", "png", "mp4", "mov");
         final long maxFileSize = 100 * 1024 * 1024; // 100 MB
 
         if (file == null || file.isEmpty()) {
