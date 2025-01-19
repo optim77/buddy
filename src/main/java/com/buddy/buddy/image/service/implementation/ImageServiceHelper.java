@@ -1,10 +1,15 @@
 package com.buddy.buddy.image.service.implementation;
 
 import com.buddy.buddy.account.entity.User;
-import com.buddy.buddy.image.repository.ImageRepository;
+import com.buddy.buddy.image.DTO.UploadImageDTO;
+import com.buddy.buddy.image.entity.Image;
+import com.buddy.buddy.image.entity.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
@@ -13,17 +18,31 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.UUID;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
+@Service
 public class ImageServiceHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageServiceHelper.class.getName());
+    @Value("${app.file.storage-path}")
+    private String storagePath;
 
-
-    // TODO: Move all helper method from ImageServiceImplementation here
+    public Image createImageEntity(UploadImageDTO dto, User user, String url, String blurredUrl, String mediaType, UUID uuid) {
+        Image image = new Image();
+        image.setUploadedDate(new Date());
+        image.setDescription(dto.getDescription());
+        image.setUser(user);
+        image.setUrl(url);
+        image.setBlurredUrl(blurredUrl);
+        image.setOpen(dto.isOpen());
+        image.setMediaType(detectMediaType(mediaType));
+        image.setId(uuid);
+        return image;
+    }
 
     public String createBlurredImage(Path originalImagePath, String extension) {
         try {
@@ -40,6 +59,25 @@ public class ImageServiceHelper {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create blurred image");
         }
     }
+
+    public Path saveFile(MultipartFile file, UUID uuid, String extension) throws IOException {
+        Path uploadPath = Paths.get(storagePath);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        String savedFileName = uuid.toString() + "." + extension;
+        Path filePath = uploadPath.resolve(savedFileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return filePath;
+    }
+
+    public String getFileExtension(MultipartFile file) {
+        return Objects.requireNonNull(file.getOriginalFilename())
+                .substring(file.getOriginalFilename().lastIndexOf('.') + 1)
+                .toLowerCase();
+    }
+
+
 
     public BufferedImage blurImage(BufferedImage image) {
         // TODO: need optimization
@@ -73,6 +111,50 @@ public class ImageServiceHelper {
         op.filter(extendedImage, blurredExtendedImage);
 
         return blurredExtendedImage.getSubimage(edgeSize, edgeSize, image.getWidth(), image.getHeight());
+    }
+
+    public void validateUploadImageDTO(UploadImageDTO uploadImageDTO) {
+        if (uploadImageDTO.getTagSet().size() > 20) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "TagSet size too large");
+        }
+        if (uploadImageDTO.getDescription().length() > 2048) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description too long");
+        }
+    }
+
+    private MediaType detectMediaType(String fileExtension) {
+        if (fileExtension.equals("jpg") || fileExtension.equals("jpeg") || fileExtension.equals("png")) {
+            return MediaType.IMAGE;
+        }
+        return MediaType.VIDEO;
+    }
+
+    public boolean isVideo(String fileExtension) {
+        final Set<String> imageExtension = Set.of("mp4", "mov", "avi");
+        return imageExtension.contains(fileExtension);
+    }
+
+    public static void validateFile(MultipartFile file) {
+        final Set<String> allowedExtensions = Set.of("jpg", "jpeg", "png", "mp4", "mov");
+        final long maxFileSize = 100 * 1024 * 1024; // 100 MB
+
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No file provided");
+        }
+
+        String fileName = file.getOriginalFilename();
+        if (fileName == null || fileName.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File name is missing");
+        }
+
+        String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        if (!allowedExtensions.contains(fileExtension)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid file extension. Allowed extensions: " + allowedExtensions);
+        }
+
+        if (file.getSize() > maxFileSize) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File size exceeds the limit of " + (maxFileSize / (1024 * 1024)) + " MB");
+        }
     }
 
 }

@@ -9,6 +9,7 @@ import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.account.service.AccountService;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.repository.ImageRepository;
+import com.buddy.buddy.image.service.implementation.ImageServiceHelper;
 import com.buddy.buddy.image.service.implementation.ImageServiceImplementation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -191,7 +192,7 @@ public class AccountServiceImplementation implements AccountService {
     @Override
     public ResponseEntity<HttpStatus> changeAvatar(MultipartFile file, User user) {
         try {
-            ImageServiceImplementation.validateFile(file);
+            ImageServiceHelper.validateFile(file);
 
             Path uploadPath = Paths.get(storagePath);
             if (!Files.exists(uploadPath)) {
