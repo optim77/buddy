@@ -1,6 +1,7 @@
 package com.buddy.buddy.subscription.entity;
 
 import com.buddy.buddy.account.entity.User;
+import com.buddy.buddy.plan.entity.Plan;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -44,5 +45,9 @@ public class Subscription {
 
     @Column
     private boolean active;
+
+    @ManyToOne
+    @JoinColumn(name = "plan_id", nullable = false)
+    private Plan plan;
 
 }
