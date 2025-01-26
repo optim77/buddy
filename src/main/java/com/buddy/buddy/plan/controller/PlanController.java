@@ -2,6 +2,7 @@ package com.buddy.buddy.plan.controller;
 
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.plan.DTO.CreatePlanDTO;
+import com.buddy.buddy.plan.DTO.GetPlanDTO;
 import com.buddy.buddy.plan.DTO.UpdatePlanDTO;
 import com.buddy.buddy.plan.entity.Plan;
 import com.buddy.buddy.plan.repository.PlanRepository;
@@ -33,8 +34,8 @@ public class PlanController {
     }
 
     @GetMapping("/plan/{plan}")
-    public ResponseEntity<Plan> getPlan(@PathVariable UUID plan, @AuthenticationPrincipal User user) {
-        return planService.getPlan(plan, user);
+    public ResponseEntity<GetPlanDTO> getPlan(@PathVariable UUID plan) {
+        return planService.getPlan(plan);
     }
 
     @GetMapping("/plan/all")

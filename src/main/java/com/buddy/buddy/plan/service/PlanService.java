@@ -2,6 +2,7 @@ package com.buddy.buddy.plan.service;
 
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.plan.DTO.CreatePlanDTO;
+import com.buddy.buddy.plan.DTO.GetPlanDTO;
 import com.buddy.buddy.plan.DTO.UpdatePlanDTO;
 import com.buddy.buddy.plan.entity.Plan;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 @Service
 public interface PlanService {
-    ResponseEntity<Plan> getPlan(UUID planId, User user);
+    ResponseEntity<GetPlanDTO> getPlan(UUID planId);
     ResponseEntity<Page<Plan>> getPlans(User user, Pageable pageable);
     ResponseEntity<HttpStatus> createPlan(CreatePlanDTO createPlanDTO, User user);
     ResponseEntity<HttpStatus> updatePlan(UpdatePlanDTO updatePlanDTO, User user);
