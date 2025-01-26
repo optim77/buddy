@@ -38,12 +38,41 @@ public class PlanServiceImplementation implements PlanService {
 
     @Override
     public ResponseEntity<HttpStatus> createPlan(CreatePlanDTO createPlanDTO, User user) {
-        return null;
+        try {
+            Plan plan = new Plan();
+            plan.setName(createPlanDTO.getName());
+            plan.setDescription(createPlanDTO.getDescription());
+            plan.setUser(user);
+            planRepository.save(plan);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @Override
     public ResponseEntity<HttpStatus> updatePlan(UpdatePlanDTO updatePlanDTO, User user) {
-        return null;
+        try {
+            planRepository.findById(updatePlanDTO.getId()).ifPresent(existingPlan -> {
+                if(existingPlan.getUser().getId().equals(user.getId())){
+                    if (!existingPlan.getDescription().equals(updatePlanDTO.getDescription())){
+                        existingPlan.setDescription(updatePlanDTO.getDescription());
+                    }
+                    if (!existingPlan.getName().equals(updatePlanDTO.getName())){
+                        existingPlan.setName(updatePlanDTO.getName());
+                    }
+                    if (existingPlan.getPrice() != updatePlanDTO.getPrice()){
+                        existingPlan.setPrice(updatePlanDTO.getPrice());
+                    }
+                    planRepository.save(existingPlan);
+                }
+
+            });
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override

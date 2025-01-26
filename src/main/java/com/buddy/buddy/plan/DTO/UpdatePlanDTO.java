@@ -8,6 +8,9 @@ import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class UpdatePlanDTO extends CreatePlanDTO{
+
     private UUID id;
+
 }
