@@ -3,6 +3,7 @@ package com.buddy.buddy.plan.service.implementation;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.plan.DTO.CreatePlanDTO;
 import com.buddy.buddy.plan.DTO.GetPlanDTO;
+import com.buddy.buddy.plan.DTO.GetPlansDTO;
 import com.buddy.buddy.plan.DTO.UpdatePlanDTO;
 import com.buddy.buddy.plan.entity.Plan;
 import com.buddy.buddy.plan.repository.PlanRepository;
@@ -32,8 +33,13 @@ public class PlanServiceImplementation implements PlanService {
     }
 
     @Override
-    public ResponseEntity<Page<Plan>> getPlans(User user, Pageable pageable) {
-        return null;
+    public ResponseEntity<Page<GetPlansDTO>> getPlans(User user, Pageable pageable) {
+        try {
+            Page<GetPlansDTO> plansDTOS = planRepository.getUserPlans(user.getId(), pageable);
+            return new ResponseEntity<>(plansDTOS, HttpStatus.OK);
+        }catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
     @Override

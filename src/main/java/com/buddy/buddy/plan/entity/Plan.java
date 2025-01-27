@@ -29,6 +29,9 @@ public class Plan {
     @Column
     private int price;
 
+    @Column
+    private int subscriptionsCount;
+
     @ManyToOne()
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

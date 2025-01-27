@@ -3,6 +3,7 @@ package com.buddy.buddy.plan.controller;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.plan.DTO.CreatePlanDTO;
 import com.buddy.buddy.plan.DTO.GetPlanDTO;
+import com.buddy.buddy.plan.DTO.GetPlansDTO;
 import com.buddy.buddy.plan.DTO.UpdatePlanDTO;
 import com.buddy.buddy.plan.entity.Plan;
 import com.buddy.buddy.plan.repository.PlanRepository;
@@ -39,7 +40,7 @@ public class PlanController {
     }
 
     @GetMapping("/plan/all")
-    private ResponseEntity<Page<Plan>> getPlans(@AuthenticationPrincipal User user, Pageable pageable) {
+    private ResponseEntity<Page<GetPlansDTO>> getPlans(@AuthenticationPrincipal User user, Pageable pageable) {
         return planService.getPlans(user, pageable);
     }
 
