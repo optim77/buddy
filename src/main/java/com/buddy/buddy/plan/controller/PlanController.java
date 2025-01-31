@@ -1,13 +1,11 @@
 package com.buddy.buddy.plan.controller;
 
 import com.buddy.buddy.account.entity.User;
-import com.buddy.buddy.plan.DTO.CreatePlanDTO;
-import com.buddy.buddy.plan.DTO.GetPlanDTO;
-import com.buddy.buddy.plan.DTO.GetPlansDTO;
-import com.buddy.buddy.plan.DTO.UpdatePlanDTO;
+import com.buddy.buddy.plan.DTO.*;
 import com.buddy.buddy.plan.entity.Plan;
 import com.buddy.buddy.plan.repository.PlanRepository;
 import com.buddy.buddy.plan.service.PlanService;
+import com.buddy.buddy.subscription.entity.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,5 +56,8 @@ public class PlanController {
         return planService.deletePlan(id, user);
     }
 
-    //TODO another endpoint to get plan with subscriptions or get subscription for plan
+    @GetMapping("/plan/{plan}/subscribers")
+    public ResponseEntity<Page<GetReviewSubscriberDTO>> getPlanSubscribers(@PathVariable UUID plan, @AuthenticationPrincipal User user, Pageable pageable) {
+        return planService.getPlanSubscribers(plan, user, pageable);
+    }
 }

@@ -1,10 +1,7 @@
 package com.buddy.buddy.plan.service.implementation;
 
 import com.buddy.buddy.account.entity.User;
-import com.buddy.buddy.plan.DTO.CreatePlanDTO;
-import com.buddy.buddy.plan.DTO.GetPlanDTO;
-import com.buddy.buddy.plan.DTO.GetPlansDTO;
-import com.buddy.buddy.plan.DTO.UpdatePlanDTO;
+import com.buddy.buddy.plan.DTO.*;
 import com.buddy.buddy.plan.entity.Plan;
 import com.buddy.buddy.plan.repository.PlanRepository;
 import com.buddy.buddy.plan.service.PlanService;
@@ -88,5 +85,15 @@ public class PlanServiceImplementation implements PlanService {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public ResponseEntity<Page<GetReviewSubscriberDTO>> getPlanSubscribers(UUID plan, User user, Pageable pageable) {
+        try {
+            Page<GetReviewSubscriberDTO> dto = planRepository.getPlanSubscribers(plan, user.getId(), pageable);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
