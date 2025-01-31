@@ -57,4 +57,6 @@ public class PlanController {
     private ResponseEntity<HttpStatus> deletePlan(@PathVariable UUID id, @AuthenticationPrincipal User user){
         return planService.deletePlan(id, user);
     }
+
+    //TODO another endpoint to get plan with subscriptions or get subscription for plan
 }

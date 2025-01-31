@@ -1,8 +1,6 @@
 package com.buddy.buddy.plan.DTO;
 
-import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.subscription.entity.Subscription;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,5 +20,4 @@ public class GetPlanDTO {
     private UUID planOwnerId;
     private String planOwnerName;
     private int subscriptionsCount;
-    private Set<Subscription> subscriptions;
 }

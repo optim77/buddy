@@ -16,7 +16,7 @@ import java.util.UUID;
 @Repository
 public interface PlanRepository extends JpaRepository<Plan, UUID> {
 
-    @Query("SELECT new com.buddy.buddy.plan.DTO.GetPlanDTO(p.id, p.name, p.description, p.price, p.user.id, p.user.username, p.subscriptionsCount, p.subscriptions) FROM Plan p WHERE p.id = :plan_id")
+    @Query("SELECT new com.buddy.buddy.plan.DTO.GetPlanDTO(p.id, p.name, p.description, p.price, p.user.id, p.user.username, p.subscriptionsCount) FROM Plan p WHERE p.id = :plan_id")
     Optional<GetPlanDTO> getPlanById(@Param("plan_id") UUID id);
 
     @Query("SELECT new com.buddy.buddy.plan.DTO.GetPlansDTO(p.id, p.name, p.description, p.price, p.user.id, p.user.username, p.subscriptionsCount) FROM Plan p WHERE p.user.id = :user_id")

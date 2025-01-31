@@ -21,7 +21,6 @@ import java.util.UUID;
 @Service
 public class PlanServiceImplementation implements PlanService {
     private final PlanRepository planRepository;
-
     public PlanServiceImplementation(PlanRepository planRepository) {
         this.planRepository = planRepository;
     }
