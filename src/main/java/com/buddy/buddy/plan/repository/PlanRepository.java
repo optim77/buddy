@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,11 +23,14 @@ public interface PlanRepository extends JpaRepository<Plan, UUID> {
     Optional<GetPlanDTO> getPlanById(@Param("plan_id") UUID id);
 
     @Query("SELECT new com.buddy.buddy.plan.DTO.GetPlansDTO(p.id, p.name, p.description, p.price, p.user.id, p.user.username, p.subscriptionsCount) FROM Plan p WHERE p.user.id = :user_id")
-    Page<GetPlansDTO>  getUserPlans(@Param("user_id") UUID user_id, Pageable pageable);
+    List<GetPlansDTO> getUserPlans(@Param("user_id") UUID user_id);
 
     @Query("SELECT new com.buddy.buddy.plan.DTO.GetReviewSubscriberDTO(s.subscriber.id, s.subscriber.username, s.subscriber.avatar, s.plan.name, s.subscriber.createdAt) " +
             "FROM Subscription s " +
             "WHERE s.plan.id = :plan " +
             "AND s.subscribedTo.id = :subscriberTo")
     Page<GetReviewSubscriberDTO> getPlanSubscribers(@Param("plan") UUID plan, @Param("subscriberTo") UUID subscriberTo, Pageable pageable);
+
+    @Query("SELECT COUNT(*) FROM Plan p WHERE p.user.id = :user_id")
+    int countPlanByUserId(@Param("user_id") UUID user_id);
 }

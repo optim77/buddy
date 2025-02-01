@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -38,7 +39,7 @@ public class PlanController {
     }
 
     @GetMapping("/plan/all")
-    private ResponseEntity<Page<GetPlansDTO>> getPlans(@AuthenticationPrincipal User user, Pageable pageable) {
+    private ResponseEntity<List<GetPlansDTO>> getPlans(@AuthenticationPrincipal User user, Pageable pageable) {
         return planService.getPlans(user, pageable);
     }
 

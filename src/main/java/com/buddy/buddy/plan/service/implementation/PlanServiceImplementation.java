@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,9 +30,9 @@ public class PlanServiceImplementation implements PlanService {
     }
 
     @Override
-    public ResponseEntity<Page<GetPlansDTO>> getPlans(User user, Pageable pageable) {
+    public ResponseEntity<List<GetPlansDTO>> getPlans(User user, Pageable pageable) {
         try {
-            Page<GetPlansDTO> plansDTOS = planRepository.getUserPlans(user.getId(), pageable);
+            List<GetPlansDTO> plansDTOS = planRepository.getUserPlans(user.getId());
             return new ResponseEntity<>(plansDTOS, HttpStatus.OK);
         }catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -41,6 +42,9 @@ public class PlanServiceImplementation implements PlanService {
     @Override
     public ResponseEntity<HttpStatus> createPlan(CreatePlanDTO createPlanDTO, User user) {
         try {
+            if (planRepository.countPlanByUserId(user.getId()) >= 5) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Too many plans");
+            }
             Plan plan = new Plan();
             plan.setName(createPlanDTO.getName());
             plan.setDescription(createPlanDTO.getDescription());

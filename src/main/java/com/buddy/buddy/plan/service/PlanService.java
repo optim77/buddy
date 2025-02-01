@@ -9,12 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public interface PlanService {
     ResponseEntity<GetPlanDTO> getPlan(UUID planId);
-    ResponseEntity<Page<GetPlansDTO>> getPlans(User user, Pageable pageable);
+    ResponseEntity<List<GetPlansDTO>> getPlans(User user, Pageable pageable);
     ResponseEntity<HttpStatus> createPlan(CreatePlanDTO createPlanDTO, User user);
     ResponseEntity<HttpStatus> updatePlan(UpdatePlanDTO updatePlanDTO, User user);
     ResponseEntity<HttpStatus> deletePlan(UUID planId, User user);

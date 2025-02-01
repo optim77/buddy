@@ -11,6 +11,8 @@ import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.repository.ImageRepository;
 import com.buddy.buddy.image.service.implementation.ImageServiceHelper;
 import com.buddy.buddy.image.service.implementation.ImageServiceImplementation;
+import com.buddy.buddy.plan.DTO.GetPlansDTO;
+import com.buddy.buddy.plan.repository.PlanRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -47,6 +50,8 @@ public class AccountServiceImplementation implements AccountService {
     private final PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(AccountServiceImplementation.class);
+    @Autowired
+    private PlanRepository planRepository;
 
     public AccountServiceImplementation(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
@@ -55,27 +60,19 @@ public class AccountServiceImplementation implements AccountService {
     @Override
     public ResponseEntity<GetUserProfileInformationDTO> getAccount(UUID userId, User user) {
         try {
+            List<GetPlansDTO> plansDTOS = planRepository.getUserPlans(userId);
             if (user != null) {
                 GetUserProfileInformationDTO dto = userRepository.findGetUserProfileInformationByIdForLogged(userId, user.getId());
+                dto.setPlans(plansDTOS);
                 return new ResponseEntity<>(dto, HttpStatus.OK);
             }
             GetUserProfileInformationDTO dto = userRepository.findGetUserProfileInformationById(userId);
+            dto.setPlans(plansDTOS);
             return new ResponseEntity<>(dto, HttpStatus.OK);
         }catch (Exception e) {
             logger.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-
-//        return userRepository.findById(userId).map(user -> {
-//            if (user.isLocked() || user.isDeleted() || !user.isActive()) {
-//                logger.debug("Cannot get user - is locked");
-//                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find user");
-//            }
-//            GetUserProfileInforamationDTO getUserDTO = new GetUserProfileInforamationDTO(user);
-//            getUserDTO.setUuid(user.getId());
-//            logger.debug("Get user DTO: {}", getUserDTO);
-//            return ResponseEntity.ok(getUserDTO);
-//        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     @Override
