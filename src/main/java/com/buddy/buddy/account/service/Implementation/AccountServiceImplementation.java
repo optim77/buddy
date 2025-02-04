@@ -101,7 +101,10 @@ public class AccountServiceImplementation implements AccountService {
     @Override
     public ResponseEntity<ProfileInformationDTO> getProfileInformation(UUID uuid) {
         try {
-            return new ResponseEntity<>(userRepository.findProfileInformationById(uuid), HttpStatus.OK);
+            List<GetPlansDTO> plansDTOS = planRepository.getUserPlans(uuid);
+            ProfileInformationDTO dto = userRepository.findProfileInformationById(uuid);
+            dto.setPlans(plansDTOS);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error");
         }
