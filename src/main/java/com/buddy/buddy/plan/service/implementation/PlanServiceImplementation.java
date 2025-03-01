@@ -43,12 +43,13 @@ public class PlanServiceImplementation implements PlanService {
     public ResponseEntity<HttpStatus> createPlan(CreatePlanDTO createPlanDTO, User user) {
         try {
             if (planRepository.countPlanByUserId(user.getId()) >= 5) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Too many plans");
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
             Plan plan = new Plan();
             plan.setName(createPlanDTO.getName());
             plan.setDescription(createPlanDTO.getDescription());
             plan.setUser(user);
+            plan.setPrice(createPlanDTO.getPrice());
             planRepository.save(plan);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }catch (Exception e){
