@@ -2,6 +2,7 @@ package com.buddy.buddy.auth;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,8 @@ public class JwtRequestFilter extends OncePerRequestFilter{
     private final UserDetailsService userDetailsService;
     @Autowired
     private final JwtUtils jwtUtils;
+    @Autowired
+    private ServletRequest servletRequest;
 
     @Override
     protected void doFilterInternal(
@@ -49,15 +52,19 @@ public class JwtRequestFilter extends OncePerRequestFilter{
 
         if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null){
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            if(jwtUtils.isTokenValid(jwt, userDetails)){
-                logger.debug("Token is valid for user: {}", userDetails.getUsername());
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }else{
-                logger.debug("Invalid token for user: {}", userDetails.getUsername());
+            try {
+                if(jwtUtils.isTokenValid(jwt, userDetails)){
+                    logger.debug("Token is valid for user: {}", userDetails.getUsername());
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }else{
+                    logger.debug("Invalid token for user: {}", userDetails.getUsername());
+                }
+            } catch (Exception ignored) {
+                logger.info("Invalid token: {} from {}", jwt,  request.getRemoteHost());
             }
         }else{
             logger.debug("Blank data");

@@ -141,6 +141,7 @@ public class ImageServiceImplementation implements ImageService {
             String blurredUrl = "";
             String blurredFilePath = null;
             if (!uploadImageDTO.isOpen() && !imageServiceHelper.isVideo(fileExtension)) {
+                user.setImagesCount(user.getImagesCount() + 1);
                 blurredUrl = imageServiceHelper.createBlurredImage(savedFilePath, fileExtension);
                 Path uploadPath = Paths.get(storagePath);
                 String blurredSavedFileName = blurredUrl + "." + fileExtension;
@@ -149,6 +150,7 @@ public class ImageServiceImplementation implements ImageService {
 
             Image image = imageServiceHelper.createImageEntity(uploadImageDTO, user, savedFilePath.toString(), blurredFilePath, fileExtension, randomUUID);
             user.setPosts(user.getPosts() + 1);
+            user.setVideosCount(user.getVideosCount() + 1);
             userRepository.save(user);
 
             Set<Tag> tags = processTags(uploadImageDTO.getTagSet());
@@ -223,6 +225,11 @@ public class ImageServiceImplementation implements ImageService {
                 imageRepository.setDeleteImageById(imageId);
                 Optional<Image> image = imageRepository.findById(imageId);
                 image.ifPresent(value -> {
+                    if (value.getMediaType() == MediaType.IMAGE){
+                        user.setImagesCount(user.getImagesCount() - 1);
+                    }else if (value.getMediaType() == MediaType.VIDEO){
+                        user.setImagesCount(user.getImagesCount() - 1);
+                    }
                     value.getTags().forEach(tag -> {
                         Optional<Tag> tag1 = tagRepository.findByName(tag.getName());
                         tag1.ifPresent(tag2 -> {

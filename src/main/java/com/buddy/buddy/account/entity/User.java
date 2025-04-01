@@ -107,6 +107,12 @@ public class User implements UserDetails {
     @Column
     private String socialOF;
 
+    @Column
+    private int imagesCount;
+
+    @Column
+    private int videosCount;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Like> likes;
 
