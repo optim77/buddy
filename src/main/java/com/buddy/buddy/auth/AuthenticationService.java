@@ -62,7 +62,7 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest){
         logger.info("Authenticating user");
         if (!StringUtils.hasText(authenticationRequest.getEmail()) || isValidEmail(authenticationRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(new AuthenticationResponse("", "Invalid email format", "")).getBody();
+            return ResponseEntity.badRequest().body(new AuthenticationResponse(null, "Invalid email format", null)).getBody();
         }
         if(isValidPassword(authenticationRequest.getPassword())) {
             return ResponseEntity.badRequest().body(new AuthenticationResponse("", "Password does not meet the requirements (8-32 characters, upper and lower case, special character)", "")).getBody();

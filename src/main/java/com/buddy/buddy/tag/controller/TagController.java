@@ -34,7 +34,6 @@ public class TagController {
         return tagService.mediaTag(tag_name, user, pageable);
     }
 
-
     @PostMapping("/tag/add")
     private ResponseEntity<HttpStatus> addTag(@RequestBody AddTagDTO addTagDTO) {
         return tagService.addTag(addTagDTO);
