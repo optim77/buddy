@@ -4,6 +4,7 @@ package com.buddy.buddy.account.entity;
 import com.buddy.buddy.image.entity.Image;
 import com.buddy.buddy.like.entity.Like;
 import com.buddy.buddy.plan.entity.Plan;
+import com.buddy.buddy.session.entity.Session;
 import com.buddy.buddy.subscription.entity.Subscription;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -58,6 +59,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "subscribedTo", cascade = CascadeType.ALL)
     private Set<Subscription> subscribers = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Session> sessions;
 
     @Column
     private int subscribersCount;
