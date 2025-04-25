@@ -23,13 +23,9 @@ import java.util.UUID;
 public class PlanController {
 
     @Autowired
-    private final PlanRepository planRepository;
-
-    @Autowired
     private final PlanService planService;
 
-    public PlanController(PlanRepository planRepository, PlanService planService) {
-        this.planRepository = planRepository;
+    public PlanController(PlanService planService) {
         this.planService = planService;
     }
 
