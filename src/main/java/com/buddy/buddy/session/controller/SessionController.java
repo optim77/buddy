@@ -1,14 +1,13 @@
 package com.buddy.buddy.session.controller;
 
 
+import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.session.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -17,11 +16,13 @@ import java.util.UUID;
 public class SessionController {
 
     @Autowired
-    private SessionService sessionService;
+    private final SessionService sessionService;
 
     public SessionController(SessionService sessionService) {
         this.sessionService = sessionService;
     }
+
+    //list sessions - auth!
 
     @GetMapping("/session/{id}")
     public ResponseEntity<HttpStatus> sessionExists(@PathVariable UUID id) {
@@ -30,5 +31,14 @@ public class SessionController {
         }else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    //create session
+
+    //delete single session
+    //delete all sessions
+    @PostMapping("/session/logout/all")
+    public ResponseEntity<HttpStatus> logoutAll(@AuthenticationPrincipal User user) {
+        return sessionService.logoutAll(user.getId());
     }
 }

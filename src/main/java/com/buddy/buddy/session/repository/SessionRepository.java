@@ -14,4 +14,7 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     @Query("SELECT CASE WHEN s.id != null THEN true ELSE false END FROM Session s WHERE s.session = :session_id")
     boolean existsBySessionId(@Param("session_id") UUID session_id);
 
+    @Query("DELETE FROM Session s WHERE s.user.id = :user_id")
+    void deleteAllByUserId(@Param("user_id") UUID user_id);
+
 }
