@@ -23,6 +23,16 @@ public class SessionServiceImplementation implements SessionService {
     }
 
     @Override
+    public ResponseEntity<HttpStatus> logoutSingle(UUID userId, UUID sessionId) {
+        try {
+            sessionRepository.deleteOneByUserId(userId, sessionId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
     public ResponseEntity<HttpStatus> logoutAll(UUID userId) {
         try {
             sessionRepository.deleteAllByUserId(userId);

@@ -35,8 +35,12 @@ public class SessionController {
 
     //create session
 
-    //delete single session
-    //delete all sessions
+
+    @PostMapping("/session/logout/single")
+    public ResponseEntity<HttpStatus> logoutSingle(@AuthenticationPrincipal User user, @RequestBody UUID sessionId) {
+        return sessionService.logoutSingle(user.getId(), sessionId);
+    }
+
     @PostMapping("/session/logout/all")
     public ResponseEntity<HttpStatus> logoutAll(@AuthenticationPrincipal User user) {
         return sessionService.logoutAll(user.getId());

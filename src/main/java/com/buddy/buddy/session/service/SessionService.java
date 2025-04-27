@@ -9,5 +9,6 @@ import java.util.UUID;
 @Service
 public interface SessionService {
     boolean sessionExists(UUID sessionId);
+    ResponseEntity<HttpStatus> logoutSingle(UUID userId, UUID sessionId);
     ResponseEntity<HttpStatus> logoutAll(UUID userId);
 }
