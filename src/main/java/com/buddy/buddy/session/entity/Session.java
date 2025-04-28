@@ -22,7 +22,7 @@ public class Session {
     private User user;
 
     @Column
-    private String session;
+    private UUID session;
 
     @Column
     private LocalDateTime startTime;

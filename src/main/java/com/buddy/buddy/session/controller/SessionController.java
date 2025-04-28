@@ -2,8 +2,11 @@ package com.buddy.buddy.session.controller;
 
 
 import com.buddy.buddy.account.entity.User;
+import com.buddy.buddy.session.DTO.GetSessionDTO;
 import com.buddy.buddy.session.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,7 +25,10 @@ public class SessionController {
         this.sessionService = sessionService;
     }
 
-    //list sessions - auth!
+    @GetMapping("/session")
+    public ResponseEntity<Page<GetSessionDTO>> getSessions(@AuthenticationPrincipal User user, Pageable pageable) {
+        return sessionService.getSessions(user, pageable);
+    }
 
     @GetMapping("/session/{id}")
     public ResponseEntity<HttpStatus> sessionExists(@PathVariable UUID id) {
@@ -34,7 +40,6 @@ public class SessionController {
     }
 
     //create session
-
 
     @PostMapping("/session/logout/single")
     public ResponseEntity<HttpStatus> logoutSingle(@AuthenticationPrincipal User user, @RequestBody UUID sessionId) {

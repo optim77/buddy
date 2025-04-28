@@ -1,7 +1,11 @@
 package com.buddy.buddy.session.service.implementation;
 
+import com.buddy.buddy.account.entity.User;
+import com.buddy.buddy.session.DTO.GetSessionDTO;
 import com.buddy.buddy.session.repository.SessionRepository;
 import com.buddy.buddy.session.service.SessionService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,18 @@ public class SessionServiceImplementation implements SessionService {
 
     public SessionServiceImplementation(SessionRepository sessionRepository) {
         this.sessionRepository = sessionRepository;
+    }
+
+    @Override
+    public ResponseEntity<Page<GetSessionDTO>> getSessions(User user, Pageable pageable) {
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        try {
+            return ResponseEntity.ok(sessionRepository.getSessions(user.getId(), pageable));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
