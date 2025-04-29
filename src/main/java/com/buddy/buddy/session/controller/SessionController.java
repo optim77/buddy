@@ -4,6 +4,7 @@ package com.buddy.buddy.session.controller;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.session.DTO.GetSessionDTO;
 import com.buddy.buddy.session.service.SessionService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,11 @@ public class SessionController {
         this.sessionService = sessionService;
     }
 
+    @PostMapping("/session/create")
+    public ResponseEntity<HttpStatus> createSession(@AuthenticationPrincipal User user, HttpServletRequest request) {
+
+    }
+
     @GetMapping("/session")
     public ResponseEntity<Page<GetSessionDTO>> getSessions(@AuthenticationPrincipal User user, Pageable pageable) {
         return sessionService.getSessions(user, pageable);
@@ -39,7 +45,6 @@ public class SessionController {
         }
     }
 
-    //create session
 
     @PostMapping("/session/logout/single")
     public ResponseEntity<HttpStatus> logoutSingle(@AuthenticationPrincipal User user, @RequestBody UUID sessionId) {

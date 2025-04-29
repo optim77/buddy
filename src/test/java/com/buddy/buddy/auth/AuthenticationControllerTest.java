@@ -45,7 +45,7 @@ public class AuthenticationControllerTest {
         AuthenticationRequest authRequest = new AuthenticationRequest("test@test.com", "Password123!");
         AuthenticationResponse mockResponse = new AuthenticationResponse("mockToken");
 
-        when(authenticationService.authenticate(any(AuthenticationRequest.class))).thenReturn(mockResponse);
+        //when(authenticationService.authenticate(any(AuthenticationRequest.class))).thenReturn(mockResponse);
 
 
         mockMvc.perform(post("/authenticate")
@@ -76,7 +76,7 @@ public class AuthenticationControllerTest {
         AuthenticationRequest authRequest = new AuthenticationRequest("test@test.com", "Password123!");
         AuthenticationResponse mockResponse = new AuthenticationResponse("mockToken");
 
-        when(authenticationService.authenticate(any(AuthenticationRequest.class))).thenReturn(mockResponse);
+        //when(authenticationService.authenticate(any(AuthenticationRequest.class))).thenReturn(mockResponse);
 
         mockMvc.perform(post("/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)

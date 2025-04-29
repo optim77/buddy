@@ -6,6 +6,8 @@ import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.auth.DTO.AuthenticationRequest;
 import com.buddy.buddy.auth.DTO.AuthenticationResponse;
 import com.buddy.buddy.auth.DTO.RegisterRequest;
+import com.buddy.buddy.session.service.SessionService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,7 @@ public class AuthenticationService {
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
+    private final SessionService sessionService;
 
     public ResponseEntity<AuthenticationResponse> register(RegisterRequest request){
         logger.info("Registering user");
@@ -59,7 +62,7 @@ public class AuthenticationService {
         }
 
     }
-    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest){
+    public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest, HttpServletRequest request){
         logger.info("Authenticating user");
         if (!StringUtils.hasText(authenticationRequest.getEmail()) || isValidEmail(authenticationRequest.getEmail())) {
             return ResponseEntity.badRequest().body(new AuthenticationResponse(null, "Invalid email format", null)).getBody();
@@ -73,6 +76,7 @@ public class AuthenticationService {
                         authenticationRequest.getPassword()));
         User user = userRepository.findByUsernameOrEmail(authenticationRequest.getEmail(), authenticationRequest.getEmail());
         String token = jwtUtils.generateToken(user);
+        sessionService.createSession(user, request, token);
         return AuthenticationResponse.builder().token(token).userId(user.getId().toString()).build();
     }
 
