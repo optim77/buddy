@@ -39,5 +39,24 @@ public class Session {
     @Column
     private String country;
 
+    @Column
+    private String countryCode;
 
+    @Column
+    private String city;
+
+    @Column
+    private String isp;
+
+    @Column
+    private String region;
+
+    @Column
+    private String timezone;
+
+    @Column
+    private String latitude;
+
+    @Column
+    private String longitude;
 }

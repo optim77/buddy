@@ -2,8 +2,10 @@ package com.buddy.buddy.session.service.implementation;
 
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.session.DTO.GetSessionDTO;
+import com.buddy.buddy.session.DTO.IpInfoDTO;
 import com.buddy.buddy.session.entity.Session;
 import com.buddy.buddy.session.repository.SessionRepository;
+import com.buddy.buddy.session.service.IpService;
 import com.buddy.buddy.session.service.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
@@ -19,9 +21,11 @@ import java.util.UUID;
 public class SessionServiceImplementation implements SessionService {
 
     private final SessionRepository sessionRepository;
+    private final IpService ipService;
 
-    public SessionServiceImplementation(SessionRepository sessionRepository) {
+    public SessionServiceImplementation(SessionRepository sessionRepository, IpService ipService) {
         this.sessionRepository = sessionRepository;
+        this.ipService = ipService;
     }
 
     @Override
@@ -35,6 +39,20 @@ public class SessionServiceImplementation implements SessionService {
             session.setCountry(request.getHeader("Accept-Language"));
             session.setStartTime(LocalDateTime.now());
             session.setEndTime(LocalDateTime.now().plusDays(30));
+            try{
+                IpInfoDTO info = ipService.getIpInfo(request.getRemoteAddr());
+                session.setCountry(info.getCountry());
+                session.setCity(info.getCity());
+                session.setCountryCode(info.getCountryCode());
+                session.setIsp(info.getIsp());
+                session.setRegion(info.getRegion());
+                session.setTimezone(info.getTimezone());
+                session.setLatitude(info.getLatitude());
+                session.setLongitude(info.getLongitude());
+            } catch (Exception ignored){
+            }
+
+            sessionRepository.save(session);
         }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -76,6 +94,6 @@ public class SessionServiceImplementation implements SessionService {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
+
 }
