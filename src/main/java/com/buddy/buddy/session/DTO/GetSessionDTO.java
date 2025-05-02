@@ -13,7 +13,7 @@ import java.util.UUID;
 public class GetSessionDTO {
 
     private UUID id;
-    private UUID sessionId;
+    private String sessionId;
     private UUID userId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;

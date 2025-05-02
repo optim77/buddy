@@ -26,10 +26,10 @@ public class SessionController {
         this.sessionService = sessionService;
     }
 
-    @PostMapping("/session/create")
-    public ResponseEntity<HttpStatus> createSession(@AuthenticationPrincipal User user, HttpServletRequest request) {
-
-    }
+//    @PostMapping("/session/create")
+//    public ResponseEntity<HttpStatus> createSession(@AuthenticationPrincipal User user, HttpServletRequest request) {
+//
+//    }
 
     @GetMapping("/session")
     public ResponseEntity<Page<GetSessionDTO>> getSessions(@AuthenticationPrincipal User user, Pageable pageable) {

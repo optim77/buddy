@@ -23,7 +23,7 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     boolean existsBySessionId(@Param("session_id") UUID session_id);
 
     @Modifying
-    @Query("DELETE FROM Session s WHERE s.user.id = :user_id AND s.id =: session_id")
+    @Query("DELETE FROM Session s WHERE s.user.id = :user_id AND s.id = :session_id")
     void deleteOneByUserId(@Param("user_id") UUID user_id, @Param("session_id") UUID session_id);
 
     @Modifying
