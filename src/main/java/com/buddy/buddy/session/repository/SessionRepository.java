@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Repository
@@ -29,5 +28,9 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     @Modifying
     @Query("DELETE FROM Session s WHERE s.user.id = :user_id")
     void deleteAllByUserId(@Param("user_id") UUID user_id);
+
+    @Modifying
+    @Query("DELETE FROM Session s WHERE s.endTime < CURRENT_TIMESTAMP")
+    int deleteOldSessions();
 
 }

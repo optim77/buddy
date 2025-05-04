@@ -2,7 +2,10 @@ package com.buddy.buddy.session.service.implementation;
 
 import com.buddy.buddy.session.DTO.IpInfoDTO;
 import com.buddy.buddy.session.service.IpService;
+import com.buddy.buddy.subscription.service.implementation.SubscriptionServiceImplementation;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -15,9 +18,12 @@ import java.net.URL;
 public class IpServiceImplementation implements IpService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger logger = LoggerFactory.getLogger(IpServiceImplementation.class.getName());
+
 
     @Override
     public IpInfoDTO getIpInfo(String ip) throws IOException {
+        logger.info("getIpInfo");
         URL url = new URL("http://ip-api.com/json/" + ip);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");

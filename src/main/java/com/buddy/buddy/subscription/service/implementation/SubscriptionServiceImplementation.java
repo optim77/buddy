@@ -1,9 +1,7 @@
 package com.buddy.buddy.subscription.service.implementation;
 
-import com.buddy.buddy.account.DTO.GetUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.account.repository.UserRepository;
-import com.buddy.buddy.image.service.implementation.ImageServiceImplementation;
 import com.buddy.buddy.subscription.DTO.GetUserInformationSubscriptionDTO;
 import com.buddy.buddy.subscription.entity.Subscription;
 import com.buddy.buddy.subscription.repository.SubscriptionRepository;
