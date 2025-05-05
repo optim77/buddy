@@ -1,11 +1,15 @@
 package com.buddy.buddy.auth.controller;
 
+import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.auth.AuthenticationService;
 import com.buddy.buddy.auth.DTO.AuthenticationRequest;
 import com.buddy.buddy.auth.DTO.AuthenticationResponse;
 import com.buddy.buddy.auth.DTO.RegisterRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -33,5 +37,10 @@ public class AuthenticationController {
     @PostMapping("/admin/authenticate")
     public ResponseEntity<AuthenticationResponse> adminAuthenticate(@Valid @RequestBody AuthenticationRequest authenticationRequest) throws AccessDeniedException {
         return ResponseEntity.ok(authenticationService.adminAuthenticate(authenticationRequest));
+    }
+
+    @PostMapping("/authorization")
+    public ResponseEntity<HttpStatus> authorization(@Valid @RequestBody String password, @AuthenticationPrincipal User user, @RequestHeader(HttpHeaders.AUTHORIZATION) String token){
+        return authenticationService.authorization(password, user, token);
     }
 }

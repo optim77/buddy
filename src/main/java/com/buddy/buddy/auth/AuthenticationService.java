@@ -6,6 +6,7 @@ import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.auth.DTO.AuthenticationRequest;
 import com.buddy.buddy.auth.DTO.AuthenticationResponse;
 import com.buddy.buddy.auth.DTO.RegisterRequest;
+import com.buddy.buddy.session.repository.SessionRepository;
 import com.buddy.buddy.session.service.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
     private final SessionService sessionService;
+    private final SessionRepository sessionRepository;
 
     public ResponseEntity<AuthenticationResponse> register(RegisterRequest request){
         logger.info("Registering user");
@@ -102,6 +105,13 @@ public class AuthenticationService {
             throw new AccessDeniedException("Access denied: User does not have admin privileges.");
         }
 
+    }
+
+    public ResponseEntity<HttpStatus> authorization(String password, User user, String request){
+        if (userRepository.checkPassword(user.getEmail(), passwordEncoder.encode(password)) && sessionRepository.checkSession(request, user.getId())){
+            return ResponseEntity.ok(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
     private boolean isValidEmail(String email) {

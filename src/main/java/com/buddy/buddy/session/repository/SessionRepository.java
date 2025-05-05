@@ -33,4 +33,6 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     @Query("DELETE FROM Session s WHERE s.endTime < CURRENT_TIMESTAMP")
     int deleteOldSessions();
 
+    @Query("SELECT CASE WHEN (s IS NOT NULL) THEN true ELSE false END FROM Session s WHERE s.session = :session_id AND s.user.id = :user_id")
+    boolean checkSession(@Param("session_id") String session_id, @Param("user_id") UUID user_id);
 }

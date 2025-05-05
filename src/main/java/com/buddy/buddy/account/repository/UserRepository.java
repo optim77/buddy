@@ -65,4 +65,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             "WHERE u.id = :user_id " +
             "AND (u.locked = false OR u.deleted = false OR u.active = true ) ")
     GetUserProfileInformationDTO findGetUserProfileInformationByIdForLogged(@Param("user_id") UUID user_id, @Param("logged_user") UUID logged_user);
+
+    @Query("SELECT CASE WHEN (u IS NOT NULL) THEN true ELSE false END FROM User u WHERE u.email = :user_email AND u.password = :user_password")
+    boolean checkPassword(@Param("user_email") String user_email, @Param("user_password") String user_password);
 }
