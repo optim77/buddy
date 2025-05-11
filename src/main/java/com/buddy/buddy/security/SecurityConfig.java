@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/image/update/{image_id}").authenticated()
                         .requestMatchers("/image/delete/{image_id}").authenticated()
                         .requestMatchers("/follow/**").authenticated()
+                        .requestMatchers("/session/**").authenticated()
                         //.requestMatchers("/images/**").authenticated()
                         .anyRequest().authenticated()
                 )

@@ -36,7 +36,6 @@ public class SessionServiceImplementation implements SessionService {
             session.setSession(token);
             session.setIp(request.getRemoteAddr());
             session.setAgent(request.getHeader("User-Agent"));
-            session.setCountry(request.getHeader("Accept-Language"));
             session.setStartTime(LocalDateTime.now());
             session.setEndTime(LocalDateTime.now().plusDays(30));
             try{
