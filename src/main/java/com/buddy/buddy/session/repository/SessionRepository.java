@@ -1,6 +1,7 @@
 package com.buddy.buddy.session.repository;
 
 import com.buddy.buddy.session.DTO.GetSessionDTO;
+import com.buddy.buddy.session.DTO.SessionLogoutRequestDTO;
 import com.buddy.buddy.session.entity.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,7 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
 
     @Modifying
     @Query("DELETE FROM Session s WHERE s.user.id = :user_id AND s.id = :session_id")
-    void deleteOneByUserId(@Param("user_id") UUID user_id, @Param("session_id") UUID session_id);
+    void deleteOneByUserId(@Param("user_id") UUID user_id, @Param("session_id") SessionLogoutRequestDTO session_id);
 
     @Modifying
     @Query("DELETE FROM Session s WHERE s.user.id = :user_id")

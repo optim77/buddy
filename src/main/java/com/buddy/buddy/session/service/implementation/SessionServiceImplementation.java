@@ -3,6 +3,7 @@ package com.buddy.buddy.session.service.implementation;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.session.DTO.GetSessionDTO;
 import com.buddy.buddy.session.DTO.IpInfoDTO;
+import com.buddy.buddy.session.DTO.SessionLogoutRequestDTO;
 import com.buddy.buddy.session.entity.Session;
 import com.buddy.buddy.session.repository.SessionRepository;
 import com.buddy.buddy.session.service.IpService;
@@ -76,7 +77,7 @@ public class SessionServiceImplementation implements SessionService {
     }
 
     @Override
-    public ResponseEntity<HttpStatus> logoutSingle(UUID userId, UUID sessionId) {
+    public ResponseEntity<HttpStatus> logoutSingle(UUID userId, SessionLogoutRequestDTO sessionId) {
         try {
             sessionRepository.deleteOneByUserId(userId, sessionId);
             return new ResponseEntity<>(HttpStatus.OK);

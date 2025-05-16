@@ -3,6 +3,7 @@ package com.buddy.buddy.session.controller;
 
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.session.DTO.GetSessionDTO;
+import com.buddy.buddy.session.DTO.SessionLogoutRequestDTO;
 import com.buddy.buddy.session.service.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class SessionController {
 
 
     @PostMapping("/session/logout/single")
-    public ResponseEntity<HttpStatus> logoutSingle(@AuthenticationPrincipal User user, @RequestBody UUID sessionId) {
+    public ResponseEntity<HttpStatus> logoutSingle(@AuthenticationPrincipal User user, @RequestBody SessionLogoutRequestDTO sessionId) {
         return sessionService.logoutSingle(user.getId(), sessionId);
     }
 
