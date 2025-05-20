@@ -1,15 +1,14 @@
 package com.buddy.buddy.session.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class SessionLogoutRequestDTO {
 
-    private UUID sessionId;
+    private String sessionId;
 }

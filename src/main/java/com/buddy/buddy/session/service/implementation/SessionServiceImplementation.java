@@ -9,6 +9,8 @@ import com.buddy.buddy.session.repository.SessionRepository;
 import com.buddy.buddy.session.service.IpService;
 import com.buddy.buddy.session.service.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,7 @@ public class SessionServiceImplementation implements SessionService {
 
     private final SessionRepository sessionRepository;
     private final IpService ipService;
+    private final static Logger logger = LoggerFactory.getLogger(SessionServiceImplementation.class);
 
     public SessionServiceImplementation(SessionRepository sessionRepository, IpService ipService) {
         this.sessionRepository = sessionRepository;
@@ -32,6 +35,7 @@ public class SessionServiceImplementation implements SessionService {
     @Override
     public ResponseEntity<HttpStatus> createSession(User user, HttpServletRequest request, String token) {
         try{
+            logger.debug("Create session");
             Session session = new Session();
             session.setUser(user);
             session.setSession(token);
@@ -54,6 +58,7 @@ public class SessionServiceImplementation implements SessionService {
 
             sessionRepository.save(session);
         }catch (Exception e){
+            logger.debug("Exception creating session {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return null;
@@ -65,23 +70,28 @@ public class SessionServiceImplementation implements SessionService {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         try {
+            logger.debug("Get single session");
             return ResponseEntity.ok(sessionRepository.getSessions(user.getId(), pageable));
         } catch (Exception e) {
+            logger.debug("Exception getting session {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Override
     public boolean sessionExists(UUID sessionId) {
+        logger.debug("Check if session exists");
         return sessionRepository.existsBySessionId(sessionId);
     }
 
     @Override
     public ResponseEntity<HttpStatus> logoutSingle(UUID userId, SessionLogoutRequestDTO sessionId) {
         try {
-            sessionRepository.deleteOneByUserId(userId, sessionId);
+            logger.debug("Logout single session");
+            sessionRepository.deleteOneByUserId(userId, sessionId.getSessionId());
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (Exception e) {
+            logger.debug("Exception logout single session {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -89,9 +99,11 @@ public class SessionServiceImplementation implements SessionService {
     @Override
     public ResponseEntity<HttpStatus> logoutAll(UUID userId) {
         try {
+            logger.debug("Logout all sessions");
             sessionRepository.deleteAllByUserId(userId);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
+            logger.debug("Exception logout all session {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
