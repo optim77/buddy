@@ -1,6 +1,7 @@
 package com.buddy.buddy.session.service.implementation;
 
 import com.buddy.buddy.account.entity.User;
+import com.buddy.buddy.exception.SessionOperationException;
 import com.buddy.buddy.session.DTO.GetSessionDTO;
 import com.buddy.buddy.session.DTO.IpInfoDTO;
 import com.buddy.buddy.session.DTO.SessionLogoutRequestDTO;
@@ -104,7 +105,7 @@ public class SessionServiceImplementation implements SessionService {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             logger.debug("Exception logout all session {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new SessionOperationException("Failed to logout all sessions");
         }
     }
 
