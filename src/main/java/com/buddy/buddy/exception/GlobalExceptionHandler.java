@@ -7,9 +7,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+
+    @ExceptionHandler(AccountOperationException.class)
+    public ResponseEntity<String> handleAccountOperationException(final AccountOperationException e) {
+        return new ResponseEntity<>(e.getMessage(), e.getStatus());
+    }
+
     @ExceptionHandler(SessionOperationException.class)
     public ResponseEntity<String> handleSessionException(SessionOperationException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(e.getMessage(), e.getStatus());
     }
 
     @ExceptionHandler(Exception.class)

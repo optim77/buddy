@@ -7,10 +7,10 @@ import com.buddy.buddy.account.DTO.UpdateUserInformationDTO;
 import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.account.repository.UserRepository;
 import com.buddy.buddy.account.service.AccountService;
+import com.buddy.buddy.exception.AccountOperationException;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.repository.ImageRepository;
 import com.buddy.buddy.image.service.implementation.ImageServiceHelper;
-import com.buddy.buddy.image.service.implementation.ImageServiceImplementation;
 import com.buddy.buddy.plan.DTO.GetPlansDTO;
 import com.buddy.buddy.plan.repository.PlanRepository;
 import org.slf4j.Logger;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,6 +61,7 @@ public class AccountServiceImplementation implements AccountService {
     @Override
     public ResponseEntity<GetUserProfileInformationDTO> getAccount(UUID userId, User user) {
         try {
+            logger.debug("Get account for user id {}", userId);
             List<GetPlansDTO> plansDTOS = planRepository.getUserPlans(userId);
             if (user != null) {
                 GetUserProfileInformationDTO dto = userRepository.findGetUserProfileInformationByIdForLogged(userId, user.getId());
@@ -69,33 +71,46 @@ public class AccountServiceImplementation implements AccountService {
             GetUserProfileInformationDTO dto = userRepository.findGetUserProfileInformationById(userId);
             dto.setPlans(plansDTOS);
             return new ResponseEntity<>(dto, HttpStatus.OK);
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            throw new AccountOperationException("Cannot get user profile information", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Override
     public ResponseEntity<Page<GetUserInformationDTO>> getUserListRandom(Pageable pageable) {
-        logger.debug("Getting random user list");
-        Page<GetUserInformationDTO> users = userRepository.findAllRandom(pageable);
-        return ResponseEntity.ok(users);
+        try {
+            logger.debug("Get user list random");
+            Page<GetUserInformationDTO> users = userRepository.findAllRandom(pageable);
+            return ResponseEntity.ok(users);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new AccountOperationException("Cannot get user list random", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @Override
     public ResponseEntity<Page<GetUserInformationDTO>> getUserListByCriteria(String criteria, Pageable pageable) {
-        if (criteria.equals("popularity")) {
-            logger.debug("Getting user list by popularity");
-            Page<GetUserInformationDTO> users = userRepository.findAllByPopularity(pageable);
-            return ResponseEntity.ok(users);
+        try {
+            logger.debug("Get user list by criteria {}", criteria);
+            if (criteria.equals("popularity")) {
+                logger.debug("Getting user list by popularity");
+                Page<GetUserInformationDTO> users = userRepository.findAllByPopularity(pageable);
+                return ResponseEntity.ok(users);
+            }
+            if (criteria.equals("newest")) {
+                logger.debug("Getting user list by newest");
+                Page<GetUserInformationDTO> users = userRepository.findAllByCreatedAt(pageable);
+                return ResponseEntity.ok(users);
+            }
+            logger.debug("Insert wrong criteria");
+            throw new AccountOperationException("Wrong criteria provided", HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new AccountOperationException("Cannot get user list by criteria", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (criteria.equals("newest")) {
-            logger.debug("Getting user list by newest");
-            Page<GetUserInformationDTO> users = userRepository.findAllByCreatedAt(pageable);
-            return ResponseEntity.ok(users);
-        }
-        logger.debug("Insert wrong criteria");
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Wrong criteria provided");
+
     }
 
     @Override

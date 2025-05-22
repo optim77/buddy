@@ -105,7 +105,7 @@ public class SessionServiceImplementation implements SessionService {
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             logger.debug("Exception logout all session {}", e.getMessage());
-            throw new SessionOperationException("Failed to logout all sessions");
+            throw new SessionOperationException("Failed to logout all sessions", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
