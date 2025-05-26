@@ -5,22 +5,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.Instant;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(AccountOperationException.class)
-    public ResponseEntity<String> handleAccountOperationException(final AccountOperationException e) {
-        return new ResponseEntity<>(e.getMessage(), e.getStatus());
+    public ResponseEntity<ApiErrorResponse> handleAccountOperationException(AccountOperationException e) {
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(e.getMessage(), e.getStatus().value(), Instant.now());
+        return new ResponseEntity<>(apiErrorResponse, e.getStatus());
     }
 
     @ExceptionHandler(SessionOperationException.class)
-    public ResponseEntity<String> handleSessionException(SessionOperationException e) {
-        return new ResponseEntity<>(e.getMessage(), e.getStatus());
+    public ResponseEntity<ApiErrorResponse> handleSessionException(SessionOperationException e) {
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(e.getMessage(), e.getStatus().value(), Instant.now());
+        return new ResponseEntity<>(apiErrorResponse, e.getStatus());
+    }
+
+    @ExceptionHandler(TagOperationException.class)
+    public ResponseEntity<ApiErrorResponse> handleTagOperationException(TagOperationException e) {
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(e.getMessage(), e.getStatus().value(), Instant.now());
+        return new ResponseEntity<>(apiErrorResponse, e.getStatus());
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleException(Exception e) {
-        return new ResponseEntity<>("Unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ApiErrorResponse> handleException(Exception e) {
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), Instant.now());
+        return new ResponseEntity<>(apiErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
