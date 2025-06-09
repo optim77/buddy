@@ -2,6 +2,7 @@ package com.buddy.buddy.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -9,6 +10,12 @@ import java.time.Instant;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AuthOperationException.class)
+    public ResponseEntity<ApiErrorResponse> authOperationException(AuthOperationException e) {
+        ApiErrorResponse apiErrorResponse = new ApiErrorResponse(e.getMessage(), e.getStatus().value(), Instant.now());
+        return new ResponseEntity<>(apiErrorResponse, e.getStatus());
+    }
 
 
     @ExceptionHandler(AccountOperationException.class)

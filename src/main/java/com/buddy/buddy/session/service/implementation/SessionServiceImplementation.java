@@ -44,18 +44,18 @@ public class SessionServiceImplementation implements SessionService {
             session.setAgent(request.getHeader("User-Agent"));
             session.setStartTime(LocalDateTime.now());
             session.setEndTime(LocalDateTime.now().plusDays(30));
-            try{
-                IpInfoDTO info = ipService.getIpInfo(request.getRemoteAddr());
-                session.setCountry(info.getCountry());
-                session.setCity(info.getCity());
-                session.setCountryCode(info.getCountryCode());
-                session.setIsp(info.getIsp());
-                session.setRegion(info.getRegion());
-                session.setTimezone(info.getTimezone());
-                session.setLatitude(info.getLatitude());
-                session.setLongitude(info.getLongitude());
-            } catch (Exception ignored){
-            }
+//            try {
+//                IpInfoDTO info = ipService.getIpInfo(request.getRemoteAddr());
+//                session.setCountry(info.getCountry());
+//                session.setCity(info.getCity());
+//                session.setCountryCode(info.getCountryCode());
+//                session.setIsp(info.getIsp());
+//                session.setRegion(info.getRegion());
+//                session.setTimezone(info.getTimezone());
+//                session.setLatitude(info.getLatitude());
+//                session.setLongitude(info.getLongitude());
+//            } catch (Exception ignored){
+//            }
 
             sessionRepository.save(session);
         }catch (Exception e){
