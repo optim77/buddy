@@ -33,7 +33,6 @@ public class User implements UserDetails {
     private String email;
 
     @Column(nullable = false, unique = true)
-
     private String username;
 
     @Column(length = 1000, nullable = true)
