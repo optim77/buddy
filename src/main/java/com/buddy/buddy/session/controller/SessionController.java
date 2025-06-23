@@ -49,7 +49,7 @@ public class SessionController {
 
     @PostMapping("/session/logout/single")
     public ResponseEntity<HttpStatus> logoutSingle(@AuthenticationPrincipal User user, @RequestBody SessionLogoutRequestDTO sessionId) {
-        return sessionService.logoutSingle(user.getId(), sessionId);
+        return sessionService.logoutSingle(user, sessionId);
     }
 
     @PostMapping("/session/logout/all")

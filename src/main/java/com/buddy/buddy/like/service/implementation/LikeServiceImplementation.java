@@ -4,10 +4,10 @@ import com.buddy.buddy.account.entity.User;
 import com.buddy.buddy.image.DTO.ImageWithUserLikeDTO;
 import com.buddy.buddy.image.entity.Image;
 import com.buddy.buddy.image.repository.ImageRepository;
-import com.buddy.buddy.image.service.implementation.ImageServiceImplementation;
 import com.buddy.buddy.like.entity.Like;
 import com.buddy.buddy.like.repository.LikeRepository;
 import com.buddy.buddy.like.service.LikeService;
+import com.buddy.buddy.notification.Service.NotificationProducerService;
 import com.buddy.buddy.subscription.repository.SubscriptionRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -28,13 +28,14 @@ public class LikeServiceImplementation implements LikeService {
     private final LikeRepository likeRepository;
     private final ImageRepository imageRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final NotificationProducerService notificationProducer;
     private static final Logger logger = LoggerFactory.getLogger(LikeServiceImplementation.class.getName());
-    private ImageServiceImplementation imageService;
 
-    public LikeServiceImplementation(LikeRepository likeRepository, ImageRepository imageRepository, SubscriptionRepository subscriptionRepository) {
+    public LikeServiceImplementation(LikeRepository likeRepository, ImageRepository imageRepository, SubscriptionRepository subscriptionRepository, NotificationProducerService notificationProducer) {
         this.likeRepository = likeRepository;
         this.imageRepository = imageRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.notificationProducer = notificationProducer;
     }
 
     @Override

@@ -14,9 +14,9 @@ import java.util.UUID;
 
 @Service
 public interface SessionService {
-    ResponseEntity<HttpStatus> createSession(User user, HttpServletRequest request, String token);
+    void createSession(User user, HttpServletRequest request, String token, UUID sessionId);
     ResponseEntity<Page<GetSessionDTO>> getSessions(User user, Pageable pageable);
     boolean sessionExists(UUID sessionId);
-    ResponseEntity<HttpStatus> logoutSingle(UUID userId, SessionLogoutRequestDTO sessionId);
+    ResponseEntity<HttpStatus> logoutSingle(User user, SessionLogoutRequestDTO sessionId);
     ResponseEntity<HttpStatus> logoutAll(UUID userId);
 }

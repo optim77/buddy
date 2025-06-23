@@ -7,6 +7,8 @@ import com.buddy.buddy.auth.DTO.AuthenticationRequest;
 import com.buddy.buddy.auth.DTO.AuthenticationResponse;
 import com.buddy.buddy.auth.DTO.RegisterRequest;
 import com.buddy.buddy.exception.AuthOperationException;
+import com.buddy.buddy.notification.DTO.RegisterNotificationRequest;
+import com.buddy.buddy.notification.Service.NotificationProducer;
 import com.buddy.buddy.session.repository.SessionRepository;
 import com.buddy.buddy.session.service.SessionService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.util.Random;
+import java.util.UUID;
 import java.util.random.RandomGenerator;
 
 import org.slf4j.Logger;
@@ -39,6 +42,7 @@ public class AuthenticationService {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
     private final SessionService sessionService;
     private final SessionRepository sessionRepository;
+
 
     public ResponseEntity<AuthenticationResponse> register(RegisterRequest request){
         logger.info("Registering user");
@@ -59,7 +63,7 @@ public class AuthenticationService {
             user.setActive(true);
             user.setRole(Role.USER);
             userRepository.save(user);
-            String token = jwtUtils.generateToken(user);
+            String token = jwtUtils.generateToken(user, UUID.randomUUID());
             return new ResponseEntity<>(AuthenticationResponse.builder().token(token).build(), HttpStatus.CREATED);
         }else{
             logger.debug("User already exists - {}", request.getEmail());
@@ -81,8 +85,9 @@ public class AuthenticationService {
                             authenticationRequest.getEmail(),
                             authenticationRequest.getPassword()));
             User user = userRepository.findByUsernameOrEmail(authenticationRequest.getEmail(), authenticationRequest.getEmail());
-            String token = jwtUtils.generateToken(user);
-            sessionService.createSession(user, request, token);
+            UUID sessionId = UUID.randomUUID();
+            String token = jwtUtils.generateToken(user, sessionId);
+            sessionService.createSession(user, request, token, sessionId);
             return AuthenticationResponse.builder().token(token).userId(user.getId().toString()).build();
         } catch (AuthenticationException e){
             throw new AuthOperationException("Invalid email format", HttpStatus.UNAUTHORIZED);
@@ -105,7 +110,8 @@ public class AuthenticationService {
                         authenticationRequest.getPassword()));
         User user = userRepository.findByUsernameOrEmail(authenticationRequest.getEmail(), authenticationRequest.getEmail());
         if (user.getRole().equals(Role.ADMIN)){
-            String token = jwtUtils.generateToken(user);
+
+            String token = jwtUtils.generateToken(user, UUID.randomUUID());
             return AuthenticationResponse.builder().token(token).userId(user.getId().toString()).build();
         }else {
             logger.debug("Admin user does not exist - {}", authenticationRequest.getEmail());

@@ -1,9 +1,13 @@
 package com.buddy.buddy.session.service.implementation;
 
 import com.buddy.buddy.account.entity.User;
+import com.buddy.buddy.auth.JwtUtils;
+import com.buddy.buddy.exception.AuthOperationException;
 import com.buddy.buddy.exception.SessionOperationException;
+import com.buddy.buddy.notification.DTO.LogoutNotificationRequest;
+import com.buddy.buddy.notification.DTO.RegisterNotificationRequest;
+import com.buddy.buddy.notification.Service.NotificationProducer;
 import com.buddy.buddy.session.DTO.GetSessionDTO;
-import com.buddy.buddy.session.DTO.IpInfoDTO;
 import com.buddy.buddy.session.DTO.SessionLogoutRequestDTO;
 import com.buddy.buddy.session.entity.Session;
 import com.buddy.buddy.session.repository.SessionRepository;
@@ -27,17 +31,22 @@ public class SessionServiceImplementation implements SessionService {
     private final SessionRepository sessionRepository;
     private final IpService ipService;
     private final static Logger logger = LoggerFactory.getLogger(SessionServiceImplementation.class);
+    private final NotificationProducer notificationProducer;
+    private final JwtUtils jwtUtils;
 
-    public SessionServiceImplementation(SessionRepository sessionRepository, IpService ipService) {
+    public SessionServiceImplementation(SessionRepository sessionRepository, IpService ipService, NotificationProducer notificationProducer, JwtUtils jwtUtils) {
         this.sessionRepository = sessionRepository;
         this.ipService = ipService;
+        this.notificationProducer = notificationProducer;
+        this.jwtUtils = jwtUtils;
     }
 
     @Override
-    public ResponseEntity<HttpStatus> createSession(User user, HttpServletRequest request, String token) {
+    public void createSession(User user, HttpServletRequest request, String token, UUID sessionId) {
         try{
             logger.debug("Create session");
             Session session = new Session();
+            session.setId(sessionId);
             session.setUser(user);
             session.setSession(token);
             session.setIp(request.getRemoteAddr());
@@ -58,11 +67,11 @@ public class SessionServiceImplementation implements SessionService {
 //            }
 
             sessionRepository.save(session);
+            this.registerSessionInNotificationService(user, sessionId, token);
         }catch (Exception e){
             logger.debug("Exception creating session {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new AuthOperationException("Cannot create session", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return null;
     }
 
     @Override
@@ -86,10 +95,11 @@ public class SessionServiceImplementation implements SessionService {
     }
 
     @Override
-    public ResponseEntity<HttpStatus> logoutSingle(UUID userId, SessionLogoutRequestDTO sessionId) {
+    public ResponseEntity<HttpStatus> logoutSingle(User user, SessionLogoutRequestDTO sessionId) {
         try {
             logger.debug("Logout single session");
-            sessionRepository.deleteOneByUserId(userId, sessionId.getSessionId());
+            sessionRepository.deleteOneByUserId(user.getId(), sessionId.getSessionId());
+            this.logoutSessionInNotificationService(user, UUID.fromString(sessionId.getSessionId()));
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (Exception e) {
             logger.debug("Exception logout single session {}", e.getMessage());
@@ -107,6 +117,38 @@ public class SessionServiceImplementation implements SessionService {
             logger.debug("Exception logout all session {}", e.getMessage());
             throw new SessionOperationException("Failed to logout all sessions", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private void registerSessionInNotificationService(User user, UUID sessionId, String token){
+        try {
+            RegisterNotificationRequest registerNotificationRequest = new RegisterNotificationRequest();
+            registerNotificationRequest.setUserId(user.getId());
+            registerNotificationRequest.setSessionId(sessionId);
+            registerNotificationRequest.setIat(jwtUtils.extractIssuedAt(token));
+            registerNotificationRequest.setExp(jwtUtils.extractExpirationTime(token));
+            notificationProducer.registerNotification(registerNotificationRequest);
+        } catch (Exception e){
+            throw new SessionOperationException(
+                    "Cannot register session in notification service",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    private void logoutSessionInNotificationService(User user, UUID sessionId){
+        try {
+            LogoutNotificationRequest logoutNotificationRequest = new LogoutNotificationRequest();
+            logoutNotificationRequest.setUserId(user.getId());
+            logoutNotificationRequest.setSessionId(sessionId);
+            logoutNotificationRequest.setSub(user.getUsername());
+            notificationProducer.logoutNotification(logoutNotificationRequest);
+        } catch (Exception e){
+            throw new SessionOperationException(
+                    "Cannot logout session from notification service",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+
     }
 
 }

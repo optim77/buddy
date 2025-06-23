@@ -21,7 +21,7 @@ public class Session {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column
+    @Column(length = 400)
     private String session;
 
     @Column

@@ -13,9 +13,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class NotificationRequest {
     private String consumerUsername;
-    private UUID consumer;
+    private UUID consumerId;
     private String broadcasterUsername;
-    private UUID broadcaster;
+    private UUID broadcasterId;
     private NotificationType type;
     private String message;
     private LocalDateTime createdAt;

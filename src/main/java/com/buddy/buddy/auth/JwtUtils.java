@@ -1,5 +1,6 @@
 package com.buddy.buddy.auth;
 
+import com.buddy.buddy.account.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -10,10 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.springframework.web.server.ResponseStatusException;
@@ -37,14 +35,20 @@ public class JwtUtils {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
+    public Long extractExpirationTime(String token) {return extractClaim(token, claims -> claims.get("exp", Long.class));}
+
+    public Long extractIssuedAt(String token) {return extractClaim(token, claims -> claims.get("iat", Long.class));}
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails){
+    public String generateToken(User userDetails, UUID sessionId){
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
+        extraClaims.put("user_id", userDetails.getId());
+        extraClaims.put("session_id", sessionId);
         return generateToken(extraClaims, userDetails);
     }
 

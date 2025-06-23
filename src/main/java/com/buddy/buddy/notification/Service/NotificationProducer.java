@@ -1,25 +1,22 @@
 package com.buddy.buddy.notification.Service;
 
-import com.buddy.buddy.notification.DTO.NotificationRequest;
+import com.buddy.buddy.notification.DTO.LogoutNotificationRequest;
+import com.buddy.buddy.notification.DTO.RegisterNotificationRequest;
+import com.buddy.buddy.notification.NotificationType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
-public class NotificationProducer {
-
-    private final WebClient webClient;
-
-    public NotificationProducer(WebClient webClient) {
-        this.webClient = webClient;
-    }
-
-    public void sendNotification(NotificationRequest event) {
-        webClient.post()
-                .uri("/notifications")
-                .bodyValue(event)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .doOnError(e -> System.err.println("Failed to send notification: " + e.getMessage()))
-                .subscribe();
-    }
+public interface NotificationProducer {
+    void registerNotification(RegisterNotificationRequest notificationRequest);
+    void logoutNotification(LogoutNotificationRequest notificationRequest);
+    void sendNotification(String consumerUsername,
+                          UUID consumerId,
+                          String broadcasterUsername,
+                          UUID broadcasterId,
+                          NotificationType type,
+                          String message,
+                          LocalDateTime createdAt);
 }
