@@ -4,6 +4,10 @@ import com.buddy.buddy.notification.DTO.LogoutNotificationRequest;
 import com.buddy.buddy.notification.DTO.NotificationRequest;
 import com.buddy.buddy.notification.DTO.RegisterNotificationRequest;
 import com.buddy.buddy.notification.NotificationType;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -19,10 +23,15 @@ public class NotificationProducerService implements NotificationProducer{
         this.webClient = webClient;
     }
 
+    @Value("${notification-service.auth-token}")
+    private String authToken;
+
     @Override
-    public void registerNotification(RegisterNotificationRequest notificationRequest) {
+    public void registerNotification(RegisterNotificationRequest notificationRequest) throws JsonProcessingException {
         webClient.post()
                 .uri("/notification/register")
+                .header("Authorization", "Bearer " + authToken)
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(notificationRequest)
                 .retrieve()
                 .bodyToMono(Void.class)
@@ -34,6 +43,8 @@ public class NotificationProducerService implements NotificationProducer{
     public void logoutNotification(LogoutNotificationRequest notificationRequest) {
         webClient.post()
                 .uri("/notification/logout")
+                .header("Authorization", "Bearer " + authToken)
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(notificationRequest)
                 .retrieve()
                 .bodyToMono(Void.class)
@@ -44,6 +55,8 @@ public class NotificationProducerService implements NotificationProducer{
     public void prepareSend(NotificationRequest event) {
         webClient.post()
                 .uri("/notifications")
+                .header("Authorization", "Bearer " + authToken)
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(event)
                 .retrieve()
                 .bodyToMono(Void.class)

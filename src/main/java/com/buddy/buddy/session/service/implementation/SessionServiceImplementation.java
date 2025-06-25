@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -124,6 +125,7 @@ public class SessionServiceImplementation implements SessionService {
             RegisterNotificationRequest registerNotificationRequest = new RegisterNotificationRequest();
             registerNotificationRequest.setUserId(user.getId());
             registerNotificationRequest.setSessionId(sessionId);
+            registerNotificationRequest.setSub(user.getUsername());
             registerNotificationRequest.setIat(jwtUtils.extractIssuedAt(token));
             registerNotificationRequest.setExp(jwtUtils.extractExpirationTime(token));
             notificationProducer.registerNotification(registerNotificationRequest);
@@ -148,7 +150,10 @@ public class SessionServiceImplementation implements SessionService {
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
+    }
 
+    private void logoutAllSessionInNotificationService(User user){
+        List<Session> sessions =  sessionRepository.getAllByUserId(user.getId());
     }
 
 }
