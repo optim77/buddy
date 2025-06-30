@@ -16,4 +16,5 @@ public class AuthenticationResponse {
     private String token;
     private String message = null;
     private String userId;
+    private UUID uuid;
 }

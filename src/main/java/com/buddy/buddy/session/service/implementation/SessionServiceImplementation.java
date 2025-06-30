@@ -100,10 +100,11 @@ public class SessionServiceImplementation implements SessionService {
         try {
             logger.debug("Logout single session");
             sessionRepository.deleteOneByUserId(user.getId(), sessionId.getSessionId());
-            this.logoutSessionInNotificationService(user, UUID.fromString(sessionId.getSessionId()));
+            logger.info(sessionId.getSessionId());
+            this.logoutSessionInNotificationService(user, sessionId.getSessionId());
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (Exception e) {
-            logger.debug("Exception logout single session {}", e.getMessage());
+            logger.error("Exception logout single session {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -137,14 +138,16 @@ public class SessionServiceImplementation implements SessionService {
         }
     }
 
-    private void logoutSessionInNotificationService(User user, UUID sessionId){
+    private void logoutSessionInNotificationService(User user, String session){
+        logger.info("Logout session {}", session);
         try {
             LogoutNotificationRequest logoutNotificationRequest = new LogoutNotificationRequest();
             logoutNotificationRequest.setUserId(user.getId());
-            logoutNotificationRequest.setSessionId(sessionId);
+            logoutNotificationRequest.setSession(session);
             logoutNotificationRequest.setSub(user.getUsername());
             notificationProducer.logoutNotification(logoutNotificationRequest);
         } catch (Exception e){
+            logger.error("Exception logout session {}", e.getMessage());
             throw new SessionOperationException(
                     "Cannot logout session from notification service",
                     HttpStatus.INTERNAL_SERVER_ERROR

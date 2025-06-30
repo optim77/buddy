@@ -47,10 +47,10 @@ public class AuthenticationService {
     public ResponseEntity<AuthenticationResponse> register(RegisterRequest request){
         logger.info("Registering user");
         if (!StringUtils.hasText(request.getEmail()) || isValidEmail(request.getEmail())) {
-            return new ResponseEntity<>(new AuthenticationResponse("", "Invalid email format", ""), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new AuthenticationResponse("", "Invalid email format", "", UUID.fromString("")), HttpStatus.BAD_REQUEST);
         }
         if(isValidPassword(request.getPassword())) {
-            return new ResponseEntity<>(new AuthenticationResponse("", "Password does not meet the requirements (8-32 characters, upper and lower case, special character)", ""), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new AuthenticationResponse("", "Password does not meet the requirements (8-32 characters, upper and lower case, special character)", "", UUID.fromString("")), HttpStatus.BAD_REQUEST);
         }
         boolean isExistEmail = userRepository.existsByEmail(request.getEmail());
         if(!isExistEmail){
@@ -67,7 +67,7 @@ public class AuthenticationService {
             return new ResponseEntity<>(AuthenticationResponse.builder().token(token).build(), HttpStatus.CREATED);
         }else{
             logger.debug("User already exists - {}", request.getEmail());
-            return new ResponseEntity<>(new AuthenticationResponse("", "Email is already in use", ""), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new AuthenticationResponse("", "Email is already in use", "", UUID.fromString("")), HttpStatus.CONFLICT);
         }
 
     }
@@ -88,7 +88,7 @@ public class AuthenticationService {
             UUID sessionId = UUID.randomUUID();
             String token = jwtUtils.generateToken(user, sessionId);
             sessionService.createSession(user, request, token, sessionId);
-            return AuthenticationResponse.builder().token(token).userId(user.getId().toString()).build();
+            return AuthenticationResponse.builder().token(token).userId(user.getId().toString()).uuid(sessionId).build();
         } catch (AuthenticationException e){
             throw new AuthOperationException("Invalid email format", HttpStatus.UNAUTHORIZED);
         }
@@ -110,7 +110,7 @@ public class AuthenticationService {
                         authenticationRequest.getPassword()));
         User user = userRepository.findByUsernameOrEmail(authenticationRequest.getEmail(), authenticationRequest.getEmail());
         if (user.getRole().equals(Role.ADMIN)){
-
+        // TODO Implement auth same as authenticate()
             String token = jwtUtils.generateToken(user, UUID.randomUUID());
             return AuthenticationResponse.builder().token(token).userId(user.getId().toString()).build();
         }else {
