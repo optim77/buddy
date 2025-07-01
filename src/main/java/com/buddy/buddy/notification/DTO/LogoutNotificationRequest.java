@@ -17,5 +17,5 @@ import java.util.UUID;
 public class LogoutNotificationRequest {
     private String sub;
     private UUID userId;
-    private String session;
+    private UUID sessionId;
 }

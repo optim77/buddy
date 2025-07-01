@@ -99,8 +99,7 @@ public class SessionServiceImplementation implements SessionService {
     public ResponseEntity<HttpStatus> logoutSingle(User user, SessionLogoutRequestDTO sessionId) {
         try {
             logger.debug("Logout single session");
-            sessionRepository.deleteOneByUserId(user.getId(), sessionId.getSessionId());
-            logger.info(sessionId.getSessionId());
+            sessionRepository.deleteOneByUserId(user.getId(), sessionId.getSessionId(), sessionId.getSession());
             this.logoutSessionInNotificationService(user, sessionId.getSessionId());
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (Exception e) {
@@ -138,12 +137,12 @@ public class SessionServiceImplementation implements SessionService {
         }
     }
 
-    private void logoutSessionInNotificationService(User user, String session){
-        logger.info("Logout session {}", session);
+    private void logoutSessionInNotificationService(User user, UUID session){
+        logger.debug("Logout session {} from notification service", session);
         try {
             LogoutNotificationRequest logoutNotificationRequest = new LogoutNotificationRequest();
             logoutNotificationRequest.setUserId(user.getId());
-            logoutNotificationRequest.setSession(session);
+            logoutNotificationRequest.setSessionId(session);
             logoutNotificationRequest.setSub(user.getUsername());
             notificationProducer.logoutNotification(logoutNotificationRequest);
         } catch (Exception e){
@@ -154,7 +153,7 @@ public class SessionServiceImplementation implements SessionService {
             );
         }
     }
-
+    // TODO Implement notification request for deleting all session for user
     private void logoutAllSessionInNotificationService(User user){
         List<Session> sessions =  sessionRepository.getAllByUserId(user.getId());
     }

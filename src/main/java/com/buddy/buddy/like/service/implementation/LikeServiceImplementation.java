@@ -7,6 +7,7 @@ import com.buddy.buddy.image.repository.ImageRepository;
 import com.buddy.buddy.like.entity.Like;
 import com.buddy.buddy.like.repository.LikeRepository;
 import com.buddy.buddy.like.service.LikeService;
+import com.buddy.buddy.notification.NotificationType;
 import com.buddy.buddy.notification.Service.NotificationProducerService;
 import com.buddy.buddy.subscription.repository.SubscriptionRepository;
 import jakarta.transaction.Transactional;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,6 +57,15 @@ public class LikeServiceImplementation implements LikeService {
                     like.setImage(image.get());
                     likeRepository.save(like);
                     imageRepository.incrementLikesCount(image_id);
+                    notificationProducer.sendNotification(
+                            image.get().getUser().getUsername(),
+                            image.get().getUser().getId(),
+                            user.getUsername(),
+                            user.getId(),
+                            NotificationType.Like,
+                            "",
+                            LocalDateTime.now()
+                    );
                     logger.debug("User liked photo");
                     return new ResponseEntity<>(HttpStatus.OK);
                 }

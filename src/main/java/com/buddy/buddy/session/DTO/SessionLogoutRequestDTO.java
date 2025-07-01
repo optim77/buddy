@@ -10,5 +10,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class SessionLogoutRequestDTO {
 
-    private String sessionId;
+    private String session;
+    private UUID sessionId;
 }
