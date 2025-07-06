@@ -54,7 +54,7 @@ public class NotificationProducerService implements NotificationProducer{
 
     public void prepareSend(NotificationRequest event) {
         webClient.post()
-                .uri("/notifications")
+                .uri("/notification/notify")
                 .header("Authorization", "Bearer " + authToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(event)
