@@ -57,6 +57,10 @@ public class LikeServiceImplementation implements LikeService {
                     like.setImage(image.get());
                     likeRepository.save(like);
                     imageRepository.incrementLikesCount(image_id);
+                    // do not send notification if self post like
+                    if (image.get().getUser().getId() == user.getId()) {
+
+                    }
                     notificationProducer.sendNotification(
                             image.get().getUser().getUsername(),
                             image.get().getUser().getId(),

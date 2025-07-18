@@ -78,4 +78,8 @@ public class NotificationProducerService implements NotificationProducer{
         prepareSend(notificationRequest);
 
     }
+
+    public boolean sendNotification(UUID consumerId, UUID broadcasterId){
+        return consumerId == broadcasterId;
+    }
 }

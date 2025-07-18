@@ -7,6 +7,8 @@ import com.buddy.buddy.follow.entity.Follow;
 import com.buddy.buddy.follow.repository.FollowRepository;
 import com.buddy.buddy.follow.servce.FollowService;
 import com.buddy.buddy.like.service.implementation.LikeServiceImplementation;
+import com.buddy.buddy.notification.NotificationType;
+import com.buddy.buddy.notification.Service.NotificationProducerService;
 import com.buddy.buddy.subscription.entity.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,10 +30,12 @@ public class FollowServiceImplementation implements FollowService {
     private final FollowRepository followRepository;
     private static final Logger logger = LoggerFactory.getLogger(FollowServiceImplementation.class.getName());
     private final UserRepository userRepository;
+    private final NotificationProducerService notificationProducer;
 
-    public FollowServiceImplementation(FollowRepository followRepository, UserRepository userRepository) {
+    public FollowServiceImplementation(FollowRepository followRepository, UserRepository userRepository, NotificationProducerService notificationProducer) {
         this.followRepository = followRepository;
         this.userRepository = userRepository;
+        this.notificationProducer = notificationProducer;
     }
 
     @Override
@@ -56,6 +61,15 @@ public class FollowServiceImplementation implements FollowService {
                         userRepository.save(user);
                         followedToUser.get().setFollowers(followedToUser.get().getFollowers() + 1);
                         userRepository.save(followedToUser.get());
+                        notificationProducer.sendNotification(
+                                followedToUser.get().getUsername(),
+                                followedToUser.get().getId(),
+                                user.getUsername(),
+                                user.getId(),
+                                NotificationType.Follow,
+                                "",
+                                LocalDateTime.now()
+                        );
                     }else {
                         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
                     }

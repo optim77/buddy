@@ -12,7 +12,6 @@ import java.util.UUID;
 public interface FollowService {
 
     ResponseEntity<HttpStatus> followOrUnfollow(User user, UUID followedTo);
-
     ResponseEntity<Page<GetUserInformationDTO>> getFollowers(User user, Pageable pageable);
     ResponseEntity<Page<GetUserInformationDTO>> getFollowing(User user, Pageable pageable);
 }
